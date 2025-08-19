@@ -448,46 +448,17 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     setShowTechnicalView(prev => {
       const newValue = !prev;
       if (newValue) {
-        // In technischer Ansicht: Originale Darstellung
+        // In technischer Ansicht: Nur Neon ausschalten, Acryl-Effekte bleiben
         if (svgRef.current) {
+          toggleNeon(svgRef.current, false, neonIntensity ?? localNeon);
           processTechnicalAcrylic(svgRef.current);
-          processTechnicalNeon(svgRef.current);
         }
         setDrag({dx: 0, dy: 0});
       } else {
-        // Zurück zur normalen Ansicht: Alle Effekte neu anwenden
+        // Zurück zur normalen Ansicht: Neon wieder einschalten, Acryl wiederherstellen
         if (svgRef.current) {
-          // Schritt 1: Acryl-Effekte wiederherstellen
           processAcrylic(svgRef.current);
-          
-          // Schritt 2: Neon komplett neu verarbeiten
-          processNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
-          
-          // Schritt 3: UV-Druck wiederherstellen
-          processUV(svgRef.current, uvOn);
-          
-          // Schritt 4: Mehrfache Neon-Wiederherstellung für Robustheit
-          setTimeout(() => {
-            if (svgRef.current) {
-              console.log('🔄 Erste Neon-Wiederherstellung:', localNeonOn, neonIntensity ?? localNeon);
-              toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
-            }
-          }, 100);
-          
-          setTimeout(() => {
-            if (svgRef.current) {
-              console.log('🔄 Zweite Neon-Wiederherstellung:', localNeonOn, neonIntensity ?? localNeon);
-              toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
-            }
-          }, 300);
-          
-          setTimeout(() => {
-            if (svgRef.current) {
-              console.log('🔄 Finale Neon-Wiederherstellung:', localNeonOn, neonIntensity ?? localNeon);
-              // Komplett neu verarbeiten
-              processNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
-            }
-          }, 500);
+          toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
         }
       }
       return newValue;
