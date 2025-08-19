@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
