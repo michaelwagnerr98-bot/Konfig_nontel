@@ -9,7 +9,7 @@ type NeonMockupStageProps = {
   neonIntensity?: number; // 0.40–2.00 (optional extern gesteuert)
   selectedBackground?: string; // Manuell gewählter Hintergrund
   onBackgroundChange?: (background: string) => void; // Callback für Hintergrundwechsel
-  onConfigChange?: (updates: any) => void; // Callback für Konfigurationsänderungen
+  onWaterproofChange?: (isWaterproof: boolean) => void; // Callback für Wasserdicht-Änderungen
 };
 
 // Reale Wandbreiten für jede Szene in cm
@@ -85,7 +85,7 @@ function sanitize(svg:SVGSVGElement){
 const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   lengthCm, waterproof, neonOn, uvOn,
   bgBrightness, neonIntensity,
-  selectedBackground, onBackgroundChange, onConfigChange
+  selectedBackground, onBackgroundChange, onWaterproofChange
 }) => {
   const planeRef = useRef<HTMLDivElement>(null);
   const svgRef   = useRef<SVGSVGElement|null>(null);
@@ -166,17 +166,17 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     // Automatische Wasserdicht-Aktivierung bei Outdoor
     if (newBackground === "outdoor_30%") {
       // Aktiviere Wasserdicht bei Outdoor
-      if (onConfigChange) {
-        onConfigChange({ isWaterproof: true });
+      if (onWaterproofChange) {
+        onWaterproofChange(true);
       } else {
-        console.warn('⚠️ onConfigChange nicht verfügbar - Wasserdicht kann nicht automatisch aktiviert werden');
+        console.warn('⚠️ onWaterproofChange nicht verfügbar - Wasserdicht kann nicht automatisch aktiviert werden');
       }
     } else {
       // Deaktiviere Wasserdicht bei Indoor (S/M/L)
-      if (onConfigChange) {
-        onConfigChange({ isWaterproof: false });
+      if (onWaterproofChange) {
+        onWaterproofChange(false);
       } else {
-        console.warn('⚠️ onConfigChange nicht verfügbar - Wasserdicht kann nicht automatisch deaktiviert werden');
+        console.warn('⚠️ onWaterproofChange nicht verfügbar - Wasserdicht kann nicht automatisch deaktiviert werden');
       }
     }
     
