@@ -9,6 +9,7 @@ type NeonMockupStageProps = {
   neonIntensity?: number; // 0.40–2.00 (optional extern gesteuert)
   selectedBackground?: string; // Manuell gewählter Hintergrund
   onBackgroundChange?: (background: string) => void; // Callback für Hintergrundwechsel
+  onConfigChange?: (updates: any) => void; // Callback für Konfigurationsänderungen
 };
 
 // Reale Wandbreiten für jede Szene in cm
@@ -84,7 +85,7 @@ function sanitize(svg:SVGSVGElement){
 const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   lengthCm, waterproof, neonOn, uvOn,
   bgBrightness, neonIntensity,
-  selectedBackground, onBackgroundChange
+  selectedBackground, onBackgroundChange, onConfigChange
 }) => {
   const planeRef = useRef<HTMLDivElement>(null);
   const svgRef   = useRef<SVGSVGElement|null>(null);
