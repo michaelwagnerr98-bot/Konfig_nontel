@@ -573,13 +573,26 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       {/* Technische Ansicht Button */}
       {/* Neon An/Aus Toggle - Floating Button */}
       {!showTechnicalView && (
-        <div className="absolute top-4 left-4 z-10">
+        <div 
+          className="absolute top-4 left-4 z-10"
+          onMouseEnter={showNeonSliderFor2Seconds}
+          onMouseLeave={() => {
+            // Clear timeout when mouse leaves the area
+            if (neonSliderTimeoutRef.current) {
+              clearTimeout(neonSliderTimeoutRef.current);
+            }
+            // Hide after short delay
+            neonSliderTimeoutRef.current = setTimeout(() => {
+              setShowNeonSlider(false);
+            }, 300);
+          }}
+        >
           <button
             onClick={() => {
               const newValue = !localNeonOn;
               setLocalNeonOn(newValue);
               toggleNeon(svgRef.current, newValue, neonIntensity ?? localNeon);
-              // Show intensity slider for 2 seconds when clicking neon button
+              // Show intensity slider for 2 seconds when toggling neon
               showNeonSliderFor2Seconds();
             }}
             className={`w-12 h-12 rounded-full backdrop-blur-sm border transition-all duration-300 flex items-center justify-center shadow-lg ${
@@ -609,18 +622,6 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 ? 'opacity-100 translate-y-0' 
                 : 'opacity-0 translate-y-2 pointer-events-none'
             }`}
-            onMouseEnter={() => {
-              // Keep slider visible when hovering over it
-              if (neonSliderTimeoutRef.current) {
-                clearTimeout(neonSliderTimeoutRef.current);
-              }
-            }}
-            onMouseLeave={() => {
-              // Hide after short delay when leaving slider
-              neonSliderTimeoutRef.current = setTimeout(() => {
-                setShowNeonSlider(false);
-              }, 300);
-            }}
           >
             <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-3 shadow-lg min-w-[140px]">
               <div className="flex items-center space-x-2 mb-2">
@@ -642,7 +643,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                     const newIntensity = parseFloat(e.target.value);
                     setLocalNeon(newIntensity);
                     toggleNeon(svgRef.current, localNeonOn, newIntensity);
-                    // Keep slider visible when using it
+                    // Extend visibility when using slider
                     showNeonSliderFor2Seconds();
                   }}
                   title={`Neon-Intensität: ${(localNeon * 100).toFixed(0)}%`}
@@ -722,6 +723,11 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       )}
 
       {/* Vollbild hint */}
+      {!showTechnicalView && (
+        <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
+          💡 Vollbild für Details
+        </div>
+      )}
 
       {/* Optionen Panel */}
       <div className="absolute top-16 right-4 z-10">
