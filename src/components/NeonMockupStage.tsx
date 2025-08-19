@@ -524,11 +524,12 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     <>
     <div style={S.scene} className={showTechnicalView ? 'bg-gray-200' : ''}>
       {/* Base */}
-      {!showTechnicalView && <div style={{
+      <div style={{
         ...S.layer, zIndex:0,
-        filter:`brightness(${(bgBrightness ?? localBg)})`,
-        backgroundImage:`url(${baseUrl})`
-      }}/>}
+        filter: showTechnicalView ? 'none' : `brightness(${(bgBrightness ?? localBg)})`,
+        backgroundImage: showTechnicalView ? 'none' : `url(${baseUrl})`,
+        backgroundColor: showTechnicalView ? '#f3f4f6' : 'transparent'
+      }}/>
       {/* Möbel (oberhalb SVG) */}
       {!showTechnicalView && <div style={{
         ...S.layer, zIndex:3,
