@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Package, ArrowRight, Home } from 'lucide-react';
+import { CheckCircle, Package, ArrowRight, Home, Edit3 } from 'lucide-react';
 
 const SuccessPage: React.FC = () => {
   const [searchParams] = useSearchParams();
