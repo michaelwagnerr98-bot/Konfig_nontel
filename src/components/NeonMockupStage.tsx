@@ -458,7 +458,14 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
         // Zurück zur normalen Ansicht: Alle Effekte neu anwenden
         if (svgRef.current) {
           processAcrylic(svgRef.current);
+          // Neon-Effekte mit aktuellen Einstellungen wiederherstellen
           processNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
+          // Zusätzlich: Neon-Toggle explizit aufrufen für korrekte Wiederherstellung
+          setTimeout(() => {
+            if (svgRef.current && localNeonOn) {
+              toggleNeon(svgRef.current, true, neonIntensity ?? localNeon);
+            }
+          }, 50);
           processUV(svgRef.current, uvOn);
         }
       }
