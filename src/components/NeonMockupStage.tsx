@@ -96,6 +96,12 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   const [localBg, setLocalBg]       = useState(bgBrightness ?? 1.0);
   const [localNeon, setLocalNeon]   = useState(neonIntensity ?? 1.40);
   const [localNeonOn, setLocalNeonOn] = useState(neonOn);
+  
+  // Zoom und Technische Ansicht States
+  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [showTechnicalView, setShowTechnicalView] = useState(false);
+  const [showZoomModal, setShowZoomModal] = useState(false);
+  
   useEffect(()=>{ setLocalNeonOn(neonOn); }, [neonOn]);
 
   const [drag, setDrag] = useState({dx:0, dy:0});
@@ -296,6 +302,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   const dd = useRef({dragging:false, startX:0, startY:0, baseDX:0, baseDY:0, neonWasOn:false});
 
   function onPointerDown(e:React.PointerEvent){
+    if (showTechnicalView) return; // Disable dragging in technical view
     dd.current.dragging = true;
     dd.current.startX = e.clientX; dd.current.startY = e.clientY;
     dd.current.baseDX = drag.dx;   dd.current.baseDY = drag.dy;
@@ -304,6 +311,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     if(localNeonOn) toggleNeon(svgRef.current, false, neonIntensity ?? localNeon); // Auto-Off
   }
   function onPointerMove(e:React.PointerEvent){
+    if (showTechnicalView) return; // Disable dragging in technical view
     if(!dd.current.dragging) return;
     const tryDX = dd.current.baseDX + (e.clientX - dd.current.startX);
     const tryDY = dd.current.baseDY + (e.clientY - dd.current.startY);
@@ -311,6 +319,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     setDrag({dx:cl.dx, dy:cl.dy});
   }
   function onPointerUp(e:React.PointerEvent){
+    if (showTechnicalView) return; // Disable dragging in technical view
     if(!dd.current.dragging) return;
     dd.current.dragging=false;
     try{ (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); }catch{}
@@ -352,21 +361,99 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
   const [open, setOpen] = useState(false);
 
+  // Zoom-Funktionen
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(3.0, prev + 0.2));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(0.5, prev - 0.2));
+  };
+
+  const resetZoom = () => {
+    setZoomLevel(1.0);
+    setDrag({dx: 0, dy: 0});
+  };
+
+  // Technische Ansicht umschalten
+  const toggleTechnicalView = () => {
+    setShowTechnicalView(prev => {
+      const newValue = !prev;
+      if (newValue) {
+        // In technischer Ansicht: Neon aus, zentrieren, zoom reset
+        toggleNeon(svgRef.current, false, neonIntensity ?? localNeon);
+        setDrag({dx: 0, dy: 0});
+        setZoomLevel(1.0);
+      } else {
+        // Zurück zur normalen Ansicht: Neon wieder an (falls es vorher an war)
+        toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
+      }
+      return newValue;
+    });
+  };
+
+  // SVG für Download vorbereiten
+  const downloadTechnicalSVG = () => {
+    if (!svgRef.current) return;
+    
+    // Clone SVG for clean technical version
+    const clonedSvg = svgRef.current.cloneNode(true) as SVGSVGElement;
+    
+    // Remove all neon effects and filters
+    clonedSvg.style.filter = 'none';
+    clonedSvg.querySelectorAll('.neon-line').forEach((el: any) => {
+      el.style.filter = 'none';
+      // Reset to original stroke color
+      const originalColor = el.getAttribute('data-neoncolor');
+      if (originalColor) {
+        el.setAttribute('stroke', originalColor);
+      }
+      el.setAttribute('stroke-width', '2');
+    });
+    
+    // Remove any glow effects
+    clonedSvg.querySelectorAll('*').forEach((el: any) => {
+      if (el.style) {
+        el.style.filter = 'none';
+        el.style.boxShadow = 'none';
+      }
+    });
+    
+    // Create download
+    const svgData = new XMLSerializer().serializeToString(clonedSvg);
+    const blob = new Blob([svgData], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'neon-design-technisch.svg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Zoom Modal öffnen
+  const openZoomModal = () => {
+    setShowZoomModal(true);
+  };
+
   return (
-    <div style={S.scene}>
+    <>
+    <div style={S.scene} className={showTechnicalView ? 'bg-white' : ''}>
       {/* Base */}
-      <div style={{
+      {!showTechnicalView && <div style={{
         ...S.layer, zIndex:0,
         filter:`brightness(${(bgBrightness ?? localBg)})`,
         backgroundImage:`url(${baseUrl})`
-      }}/>
+      }}/>}
       {/* Möbel (oberhalb SVG) */}
-      <div style={{
+      {!showTechnicalView && <div style={{
         ...S.layer, zIndex:3,
         backgroundImage:`url(${mobelUrl})`
-      }}/>
+      }}/>}
       {/* Rain (12%) */}
-      {(setName==="outdoor_30%" && waterproof) && (
+      {(setName==="outdoor_30%" && waterproof && !showTechnicalView) && (
         <div style={S.rain}>
           {/* CSS Rain Effect */}
           {Array.from({ length: 120 }).map((_, i) => (
@@ -388,19 +475,85 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
         <div
           data-mockup-stage
           ref={planeRef}
-          style={S.plane}
+          style={{
+            ...S.plane,
+            transform: `translate(-50%,-50%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(${zoomLevel})`,
+            cursor: showTechnicalView ? 'default' : 'grab'
+          }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={onPointerUp}
+          onDoubleClick={openZoomModal}
         />
       </div>
 
-      {/* Overlay (transparent, kompakt) */}
-      <div className="absolute top-4 right-4 z-10">
+      {/* Zoom Controls */}
+      {!showTechnicalView && (
+        <div className="absolute top-4 left-4 z-10 flex flex-col space-y-2">
+          <button
+            onClick={handleZoomIn}
+            className="w-10 h-10 bg-white/90 hover:bg-white rounded-lg shadow-md flex items-center justify-center text-gray-700 hover:text-blue-600 transition-all duration-200 backdrop-blur-sm border border-gray-200"
+            title="Vergrößern"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+          </button>
+          <button
+            onClick={handleZoomOut}
+            className="w-10 h-10 bg-white/90 hover:bg-white rounded-lg shadow-md flex items-center justify-center text-gray-700 hover:text-blue-600 transition-all duration-200 backdrop-blur-sm border border-gray-200"
+            title="Verkleinern"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+            </svg>
+          </button>
+          <button
+            onClick={resetZoom}
+            className="w-10 h-10 bg-white/90 hover:bg-white rounded-lg shadow-md flex items-center justify-center text-gray-700 hover:text-blue-600 transition-all duration-200 backdrop-blur-sm border border-gray-200"
+            title="Zurücksetzen"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Technische Ansicht Button */}
+      <div className="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+        <button
+          onClick={toggleTechnicalView}
+          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 border backdrop-blur-sm flex items-center space-x-2 ${
+            showTechnicalView
+              ? 'bg-blue-600 text-white border-blue-500 shadow-lg'
+              : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white hover:shadow-md'
+          }`}
+          title={showTechnicalView ? 'Zurück zur Neon-Ansicht' : 'Technische Skizze anzeigen'}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>{showTechnicalView ? 'Neon-Ansicht' : 'Technische Skizze'}</span>
+        </button>
+        
+        {showTechnicalView && (
+          <button
+            onClick={downloadTechnicalSVG}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-all duration-300 shadow-lg flex items-center space-x-2"
+            title="SVG-Datei herunterladen"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <span>SVG Download</span>
+          </button>
+        )}
+
         <button 
           onClick={()=>setOpen(v=>!v)}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 border backdrop-blur-sm ${
+          className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 border backdrop-blur-sm mt-2 ${
             open 
               ? 'bg-blue-600 text-white border-blue-500 shadow-lg' 
               : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white hover:shadow-md'
@@ -416,6 +569,34 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
           </div>
           <span>Optionen</span>
         </button>
+      </div>
+
+      {/* Zoom Level Indicator */}
+      {zoomLevel !== 1.0 && !showTechnicalView && (
+        <div className="absolute bottom-4 left-4 z-10 bg-black/70 text-white px-3 py-1 rounded-lg text-sm font-medium backdrop-blur-sm">
+          Zoom: {(zoomLevel * 100).toFixed(0)}%
+        </div>
+      )}
+
+      {/* Technical View Indicator */}
+      {showTechnicalView && (
+        <div className="absolute bottom-4 left-4 z-10 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg flex items-center space-x-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          <span>Technische Ansicht</span>
+        </div>
+      )}
+
+      {/* Double-click hint */}
+      {!showTechnicalView && (
+        <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-3 py-1 rounded-lg text-xs backdrop-blur-sm">
+          Doppelklick für Vollbild
+        </div>
+      )}
+
+      {/* Optionen Panel */}
+      <div className="absolute top-16 right-4 z-10">
         
         {open && (
           <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 min-w-[220px] backdrop-blur-sm">
@@ -462,7 +643,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
               </div>
             )}
             {/* Neon An/Aus – sofort nutzbar */}
-            <div className="flex items-center justify-between">
+            {!showTechnicalView && <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-gray-700">Neon an</label>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -479,10 +660,10 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   }`}></div>
                 </div>
               </label>
-            </div>
+            </div>}
 
             {/* Hintergrund-Auswahl */}
-            <div className="space-y-2">
+            {!showTechnicalView && <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Hintergrund</label>
               <div className="grid grid-cols-2 gap-1">
                 {AVAILABLE_BACKGROUNDS.map((bg) => (
@@ -500,12 +681,84 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   </button>
                 ))}
               </div>
-            </div>
+            </div>}
             </div>
           </div>
         )}
       </div>
     </div>
+
+    {/* Zoom Modal */}
+    {showZoomModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
+        <div className="relative max-w-[95vw] max-h-[95vh] bg-white rounded-lg overflow-hidden">
+          {/* Modal Header */}
+          <div className="absolute top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 p-4 z-10 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-800">Design-Detailansicht</h3>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={downloadTechnicalSVG}
+                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm font-medium transition-colors flex items-center space-x-1"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>SVG</span>
+              </button>
+              <button
+                onClick={() => setShowZoomModal(false)}
+                className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Modal Content */}
+          <div className="pt-16 p-6 bg-gray-50 min-h-[600px] flex items-center justify-center">
+            {svgRef.current ? (
+              <div 
+                className="max-w-full max-h-full bg-white rounded-lg shadow-lg p-6 border-2 border-gray-200"
+                style={{ maxWidth: '800px', maxHeight: '600px' }}
+                dangerouslySetInnerHTML={{ 
+                  __html: (() => {
+                    const clonedSvg = svgRef.current!.cloneNode(true) as SVGSVGElement;
+                    clonedSvg.style.filter = 'none';
+                    clonedSvg.setAttribute('width', '100%');
+                    clonedSvg.setAttribute('height', '100%');
+                    clonedSvg.style.maxWidth = '100%';
+                    clonedSvg.style.maxHeight = '100%';
+                    
+                    // Clean up for modal display
+                    clonedSvg.querySelectorAll('.neon-line').forEach((el: any) => {
+                      el.style.filter = 'none';
+                      const originalColor = el.getAttribute('data-neoncolor');
+                      if (originalColor) {
+                        el.setAttribute('stroke', originalColor);
+                      }
+                      el.setAttribute('stroke-width', '2');
+                    });
+                    
+                    return clonedSvg.outerHTML;
+                  })()
+                }}
+              />
+            ) : (
+              <div className="text-center text-gray-500">
+                <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p>Kein SVG geladen</p>
+                <p className="text-sm mt-2">Laden Sie zuerst ein SVG-Design</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 
