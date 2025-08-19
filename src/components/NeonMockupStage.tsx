@@ -522,7 +522,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
   return (
     <>
-    <div style={S.scene} className={showTechnicalView ? 'bg-white' : ''}>
+    <div style={S.scene} className={showTechnicalView ? 'bg-gray-200' : ''}>
       {/* Base */}
       {!showTechnicalView && <div style={{
         ...S.layer, zIndex:0,
