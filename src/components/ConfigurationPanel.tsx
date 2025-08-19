@@ -207,11 +207,14 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
               <div className="flex-1">
                 <span className="text-gray-700 font-medium text-sm md:text-base">Super EXPRESS Produktion</span>
                 <div className="text-sm text-gray-500">1 Tag • Muss telefonisch abgeklärt werden</div>
+                <div className="text-xs text-blue-600 font-medium mt-1">
+                  Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
+                </div>
               </div>
               <div className="relative group">
                 <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors flex-shrink-0" />
                 <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 hidden md:block">
-                  Dafür werden zusätzliche Kosten berechnet
+                  Dafür werden zusätzliche Kosten berechnet. Für noch schnellere Produktion rufen Sie +4915225325349 an.
                   <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                 </div>
               </div>
