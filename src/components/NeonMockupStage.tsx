@@ -95,7 +95,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
   // Fallback-States (falls Props nicht gesetzt sind)
   const [localBg, setLocalBg]       = useState(bgBrightness ?? 1.0);
-  const [localNeon, setLocalNeon]   = useState(neonIntensity ?? 1.40);
+  const [localNeon, setLocalNeon]   = useState(neonIntensity ?? 1.50);
   const [localNeonOn, setLocalNeonOn] = useState(neonOn);
   
   // Neon-Intensität Slider Animation
@@ -124,7 +124,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     // Set new timeout for 4 seconds
     neonSliderTimeoutRef.current = setTimeout(() => {
       setShowNeonSlider(false);
-    }, 4000);
+    }, 2000);
   };
 
   // Cleanup timeout on unmount
