@@ -724,7 +724,11 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
       {/* Vollbild hint */}
       {!showTechnicalView && (
-        <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
+        <div 
+          className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm cursor-pointer hover:bg-black/70 transition-all duration-300 hover:scale-105 active:scale-95"
+          onClick={openZoomModal}
+          title="Vollbild-Ansicht öffnen"
+        >
           💡 Vollbild für Details
         </div>
       )}
