@@ -124,7 +124,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
             <Scissors className="h-4 md:h-3 w-4 md:w-3 text-gray-500 flex-shrink-0" />
             <div className="flex items-center space-x-1">
               <span className="text-sm md:text-xs text-gray-600">
-                Mehrteilig (&gt;300cm, +15%)
+                Mehrteilig (>300cm, +15%)
               </span>
               <div className="relative group">
                 <Info className="h-4 md:h-3 w-4 md:w-3 text-gray-400 hover:text-blue-500 cursor-help transition-colors flex-shrink-0" />
@@ -207,9 +207,6 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
               <div className="flex-1">
                 <span className="text-gray-700 font-medium text-sm md:text-base">Super EXPRESS Produktion</span>
                 <div className="text-sm text-gray-500">1 Tag • Muss telefonisch abgeklärt werden</div>
-                <div className="text-xs text-blue-600 font-medium mt-1">
-                  Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
-                </div>
                 <div className="text-xs text-blue-600 font-medium mt-1">
                   Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
                 </div>
