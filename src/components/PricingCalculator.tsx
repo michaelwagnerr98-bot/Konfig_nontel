@@ -3,7 +3,6 @@ import { Calculator, CreditCard, Eye, EyeOff, X, ShoppingCart, Package, Truck, H
 import { ConfigurationState, PriceBreakdown } from '../types/configurator';
 import { calculatePriceBreakdown, calculateSingleSignPrice, requiresPersonalDelivery, calculateDistance, calculateRealDistance, getLargestSignDimensions, getShippingInfo, calculateArea } from '../utils/calculations';
 import { mondayService } from '../services/mondayService';
-import SVGPreview from './SVGPreview';
 
 interface PricingCalculatorProps {
   config: ConfigurationState;
