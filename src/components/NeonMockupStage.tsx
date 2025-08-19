@@ -108,8 +108,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   const dynamicPxPerCm = useMemo(() => {
     const realSceneWidthCm = SCENE_REAL_WIDTHS_CM[setName] || 300;
     // Berechne Pixel pro cm: Viewport-Breite / reale Szenenbreite * baseScale * Vergrößerungsfaktor
-    // Outdoor bekommt starke Vergrößerung, Indoor bleibt wie vorher
-    const enlargementFactor = setName === "outdoor_30%" ? 15.0 : 1.0;
+    // Alle Szenen bekommen Vergrößerung für bessere Sichtbarkeit
+    const enlargementFactor = setName === "outdoor_30%" ? 15.0 : 8.0;
     const pxPerCm = (VIEWPORT_WIDTH_FOR_SCALING_PX / realSceneWidthCm) * baseScale * enlargementFactor;
     console.log(`📏 Dynamische Skalierung für ${setName}:`, {
       realSceneWidthCm,
