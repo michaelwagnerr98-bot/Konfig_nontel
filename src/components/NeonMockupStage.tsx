@@ -166,10 +166,18 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     // Automatische Wasserdicht-Aktivierung bei Outdoor
     if (newBackground === "outdoor_30%") {
       // Aktiviere Wasserdicht bei Outdoor
-      onConfigChange && onConfigChange({ isWaterproof: true });
+      if (onConfigChange) {
+        onConfigChange({ isWaterproof: true });
+      } else {
+        console.warn('⚠️ onConfigChange nicht verfügbar - Wasserdicht kann nicht automatisch aktiviert werden');
+      }
     } else {
       // Deaktiviere Wasserdicht bei Indoor (S/M/L)
-      onConfigChange && onConfigChange({ isWaterproof: false });
+      if (onConfigChange) {
+        onConfigChange({ isWaterproof: false });
+      } else {
+        console.warn('⚠️ onConfigChange nicht verfügbar - Wasserdicht kann nicht automatisch deaktiviert werden');
+      }
     }
     
     // Reset drag position when changing background
