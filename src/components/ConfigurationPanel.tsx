@@ -128,8 +128,8 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
               </span>
               <div className="relative group">
                 <Info className="h-4 md:h-3 w-4 md:w-3 text-gray-400 hover:text-blue-500 cursor-help transition-colors flex-shrink-0" />
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 hidden md:block">
-                  Das Schild wird aus mehreren Teilen gefertigt und muss vor Ort zusammengesetzt
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 hidden md:block w-64 text-center">
+                  Für Außenbereich geeignet - Schutz vor Regen, Staub und Feuchtigkeit (IP65-Zertifizierung)
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                 </div>
               </div>
