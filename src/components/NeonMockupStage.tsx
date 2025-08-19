@@ -681,51 +681,58 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 />
               </div>
             )}
-            {neonIntensity===undefined && (
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-700">Neon-Intensität</label>
-                <input 
-                  type="range" 
-                  min={0.40} 
-                  max={2.00} 
-                  step={0.01}
-                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                  defaultValue={localNeon}
-                  onChange={(e)=>{ 
-                    const v=parseFloat(e.currentTarget.value); 
-                    setLocalNeon(v); 
-                    toggleNeon(svgRef.current, localNeonOn, v);
-                    // Auto-close after short delay for sliders
-                    setTimeout(() => setOpen(false), 1000);
-                  }}
-                />
-              </div>
-            )}
-
-            {/* Hintergrund-Auswahl */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-700">Hintergrund</label>
-              <div className="grid grid-cols-2 gap-1.5">
-                {AVAILABLE_BACKGROUNDS.map((bg) => (
-                  <button
-                    key={bg.key}
-                    onClick={() => handleBackgroundChange(bg.key)}
-                    className={`px-2 py-1 text-xs rounded-md font-medium transition-colors ${
-                      currentBackground === bg.key
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                    }`}
-                    title={bg.description}
-                  >
-                    {bg.label}
-                  </button>
-                ))}
-              </div>
-            </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Neon-Intensität Slider - Vertikal unter Neon-Button */}
+      {neonIntensity === undefined && !showTechnicalView && (
+        <div className="absolute top-20 left-4 z-10 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg p-2 shadow-lg">
+          <div className="flex flex-col items-center space-y-2">
+            <div className="text-xs font-medium text-gray-700 writing-mode-vertical transform rotate-180">
+              Intensität
+            </div>
+            <input
+              type="range"
+              min={0.40}
+              max={2.00}
+              step={0.01}
+              value={localNeon}
+              onChange={(e) => {
+                const v = parseFloat(e.currentTarget.value);
+                setLocalNeon(v);
+                toggleNeon(svgRef.current, localNeonOn, v);
+              }}
+              className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider transform -rotate-90 origin-center"
+              style={{ writingMode: 'bt-lr' }}
+            />
+            <div className="text-xs text-gray-600 font-medium">
+              {(localNeon * 100).toFixed(0)}%
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Hintergrund-Auswahl - Unten links, klein und kompakt */}
+    <div className="absolute bottom-4 left-4 z-10 flex space-x-1">
+      {AVAILABLE_BACKGROUNDS.map((bg) => (
+        <button
+          key={bg.key}
+          onClick={() => handleBackgroundChange(bg.key)}
+          className={`w-8 h-8 rounded-md text-xs font-bold transition-all duration-300 shadow-sm border ${
+            currentBackground === bg.key
+              ? 'bg-blue-600 text-white border-blue-500 scale-110'
+              : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white hover:scale-105'
+          }`}
+          title={`${bg.label} - ${bg.description}`}
+        >
+          {bg.key === "ab_20cm_50%" ? "S" :
+           bg.key === "ab_100cm_50%" ? "M" :
+           bg.key === "ab_200cm_50%" ? "L" : "O"}
+        </button>
+      ))}
     </div>
 
     {/* Zoom Modal */}
