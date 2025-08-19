@@ -335,7 +335,6 @@ function App() {
         </div>
 
         {/* Bottom Navigation Menu - HIER IST DAS UNTERE MENÜ! */}
-        {/* Bottom Navigation Menu - HIER IST DAS UNTERE MENÜ! */}
         <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 lg:hidden">
           <div className="grid grid-cols-4 h-16">
             {/* Design */}
