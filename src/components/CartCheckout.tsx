@@ -3,7 +3,6 @@ import { ArrowLeft, ShoppingCart, CreditCard, FileText, Edit3, Truck, Home, MapP
 import { ConfigurationState } from '../types/configurator';
 import { calculateSingleSignPrice, calculateDistance, getShippingInfo, calculateArea } from '../utils/calculations';
 import { mondayService } from '../services/mondayService';
-import SVGPreview from './SVGPreview';
 interface CartCheckoutProps {
   config: ConfigurationState;
   onConfigChange: (updates: Partial<ConfigurationState>) => void;

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { STRIPE_PRODUCTS, StripeProduct } from '../stripe-config';
 import { ShoppingCart, CreditCard, Package, User, LogOut } from 'lucide-react';
 

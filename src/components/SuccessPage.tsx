@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight, Home } from 'lucide-react';
 
 const SuccessPage: React.FC = () => {

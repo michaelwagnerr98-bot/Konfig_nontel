@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, UserPlus, User } from 'lucide-react';
 
 const SignupPage: React.FC = () => {
