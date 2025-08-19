@@ -810,7 +810,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     </div>
 
     {/* Hintergrund-Auswahl - Unten links, klein und kompakt */}
-    <div className="absolute bottom-4 left-4 z-10 flex space-x-1">
+    {!showTechnicalView && (
+      <div className="absolute bottom-4 left-4 z-10 flex space-x-1">
       {AVAILABLE_BACKGROUNDS.map((bg) => (
         <button
           key={bg.key}
@@ -827,7 +828,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
            bg.key === "ab_200cm_50%" ? "L" : "O"}
         </button>
       ))}
-    </div>
+      </div>
+    )}
 
     {/* Zoom Modal */}
     {showZoomModal && (
