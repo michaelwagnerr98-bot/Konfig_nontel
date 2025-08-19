@@ -7,6 +7,8 @@ type NeonMockupStageProps = {
   uvOn: boolean;          // UV-Druck an/aus (von deinem UI)
   bgBrightness?: number;  // 0.30–1.60 (optional extern gesteuert)
   neonIntensity?: number; // 0.40–2.00 (optional extern gesteuert)
+  selectedBackground?: string; // Manuell gewählter Hintergrund
+  onBackgroundChange?: (background: string) => void; // Callback für Hintergrundwechsel
 };
 
 // Reale Wandbreiten für jede Szene in cm
@@ -16,6 +18,14 @@ const SCENE_REAL_WIDTHS_CM: Record<string, number> = {
   "ab_200cm_50%": 700,   // 7 Meter Wandbreite
   "outdoor_30%": 2000,   // 20 Meter Außenbereich
 };
+
+// Verfügbare Hintergründe mit Labels
+const AVAILABLE_BACKGROUNDS = [
+  { key: "ab_20cm_50%", label: "Klein (3m)", description: "Kleiner Raum" },
+  { key: "ab_100cm_50%", label: "Mittel (5m)", description: "Mittlerer Raum" },
+  { key: "ab_200cm_50%", label: "Groß (7m)", description: "Großer Raum" },
+  { key: "outdoor_30%", label: "Outdoor (20m)", description: "Außenbereich" },
+];
 
 // Referenz-Viewport-Breite für Skalierung (Pixel)
 const VIEWPORT_WIDTH_FOR_SCALING_PX = 400;
@@ -73,10 +83,14 @@ function sanitize(svg:SVGSVGElement){
 
 const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   lengthCm, waterproof, neonOn, uvOn,
-  bgBrightness, neonIntensity
+  bgBrightness, neonIntensity,
+  selectedBackground, onBackgroundChange
 }) => {
   const planeRef = useRef<HTMLDivElement>(null);
   const svgRef   = useRef<SVGSVGElement|null>(null);
+
+  // State für manuell gewählten Hintergrund
+  const [currentBackground, setCurrentBackground] = useState(selectedBackground || "ab_100cm_50%");
 
   // Fallback-States (falls Props nicht gesetzt sind)
   const [localBg, setLocalBg]       = useState(bgBrightness ?? 1.0);
@@ -86,14 +100,15 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
   const [drag, setDrag] = useState({dx:0, dy:0});
 
-  const setName   = useMemo(()=>pickSet(lengthCm, waterproof), [lengthCm, waterproof]);
+  // Verwende manuell gewählten Hintergrund statt automatischer Auswahl
+  const setName = currentBackground;
   const baseScale = setName==="outdoor_30%" ? OUTDOOR_BASE : INDOOR_BASE;
   
   // Dynamische Pixel-pro-Zentimeter Berechnung basierend auf realer Szenenbreite
   const dynamicPxPerCm = useMemo(() => {
     const realSceneWidthCm = SCENE_REAL_WIDTHS_CM[setName] || 300;
     // Berechne Pixel pro cm: Viewport-Breite / reale Szenenbreite * baseScale * Vergrößerungsfaktor
-    const enlargementFactor = 3.0; // Vergrößerungsfaktor um Schilder sichtbarer zu machen
+    const enlargementFactor = 15.0; // Stark erhöhter Vergrößerungsfaktor
     const pxPerCm = (VIEWPORT_WIDTH_FOR_SCALING_PX / realSceneWidthCm) * baseScale * enlargementFactor;
     console.log(`📏 Dynamische Skalierung für ${setName}:`, {
       realSceneWidthCm,
@@ -104,6 +119,14 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     });
     return pxPerCm;
   }, [setName, baseScale]);
+
+  // Hintergrund wechseln
+  const handleBackgroundChange = (newBackground: string) => {
+    setCurrentBackground(newBackground);
+    onBackgroundChange?.(newBackground);
+    // Reset drag position when changing background
+    setDrag({dx: 0, dy: 0});
+  };
 
   const S: Record<string, React.CSSProperties> = {
     scene:{position:"relative", inset:0, width:"100%", height:"100%", background:"#000", overflow:"hidden", borderRadius:12},
@@ -455,6 +478,27 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   }`}></div>
                 </div>
               </label>
+            </div>
+
+            {/* Hintergrund-Auswahl */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Hintergrund</label>
+              <div className="grid grid-cols-2 gap-1">
+                {AVAILABLE_BACKGROUNDS.map((bg) => (
+                  <button
+                    key={bg.key}
+                    onClick={() => handleBackgroundChange(bg.key)}
+                    className={`px-2 py-1.5 text-xs rounded-md font-medium transition-colors ${
+                      currentBackground === bg.key
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                    }`}
+                    title={bg.description}
+                  >
+                    {bg.label}
+                  </button>
+                ))}
+              </div>
             </div>
             </div>
           </div>
