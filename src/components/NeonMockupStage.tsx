@@ -20,8 +20,8 @@ const SCENE_REAL_WIDTHS_CM: Record<string, number> = {
 // Referenz-Viewport-Breite für Skalierung (Pixel)
 const VIEWPORT_WIDTH_FOR_SCALING_PX = 400;
 
-const INDOOR_BASE = 0.50;     // „50% kleiner“
-const OUTDOOR_BASE = 0.30;    // „70% kleiner“
+const INDOOR_BASE = 0.50;     // „50% kleiner"
+const OUTDOOR_BASE = 0.30;    // „70% kleiner"
 const GLOW_RADII_BASE = [1.9, 3.8, 6.6, 9.8];
 const GLOW_ALPHA_BASE = [0.54, 0.40, 0.26, 0.15];
 
@@ -92,12 +92,14 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   // Dynamische Pixel-pro-Zentimeter Berechnung basierend auf realer Szenenbreite
   const dynamicPxPerCm = useMemo(() => {
     const realSceneWidthCm = SCENE_REAL_WIDTHS_CM[setName] || 300;
-    // Berechne Pixel pro cm: Viewport-Breite / reale Szenenbreite * baseScale
-    const pxPerCm = (VIEWPORT_WIDTH_FOR_SCALING_PX / realSceneWidthCm) * baseScale;
+    // Berechne Pixel pro cm: Viewport-Breite / reale Szenenbreite * baseScale * Vergrößerungsfaktor
+    const enlargementFactor = 3.0; // Vergrößerungsfaktor um Schilder sichtbarer zu machen
+    const pxPerCm = (VIEWPORT_WIDTH_FOR_SCALING_PX / realSceneWidthCm) * baseScale * enlargementFactor;
     console.log(`📏 Dynamische Skalierung für ${setName}:`, {
       realSceneWidthCm,
       viewportWidth: VIEWPORT_WIDTH_FOR_SCALING_PX,
       baseScale,
+      enlargementFactor,
       calculatedPxPerCm: pxPerCm
     });
     return pxPerCm;
