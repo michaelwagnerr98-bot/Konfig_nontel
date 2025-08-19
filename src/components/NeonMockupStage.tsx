@@ -560,11 +560,11 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
         >
           {localNeonOn ? (
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
             </svg>
           ) : (
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
             </svg>
           )}
         </button>
@@ -608,7 +608,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
           </svg>
         </button>
 
-        {!showTechnicalView && <button 
+        <button 
           onClick={()=>setOpen(v=>!v)}
           className={`w-10 h-10 rounded-lg transition-all duration-300 border backdrop-blur-sm flex items-center justify-center shadow-lg ${
             open 
@@ -621,7 +621,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
-        </button>}
+        </button>
       </div>
 
       {/* Technical View Indicator */}
@@ -703,7 +703,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
             )}
 
             {/* Hintergrund-Auswahl */}
-            {!showTechnicalView && <div className="space-y-2">
+            <div className="space-y-2">
               <label className="text-xs font-medium text-gray-700">Hintergrund</label>
               <div className="grid grid-cols-2 gap-1.5">
                 {AVAILABLE_BACKGROUNDS.map((bg) => (
@@ -721,7 +721,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   </button>
                 ))}
               </div>
-            </div>}
+            </div>
             </div>
           </div>
         )}
