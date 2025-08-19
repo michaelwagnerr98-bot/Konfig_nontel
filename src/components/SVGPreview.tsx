@@ -61,11 +61,30 @@ const SVGPreview: React.FC<SVGPreviewProps> = ({
         }
       });
       
+      // Remove any clip-path overlays that might interfere
+      clonedSvg.querySelectorAll('g[clip-path]').forEach((el: any) => {
+        // Keep the main groups but remove overlay effects
+        if (el.style) {
+          el.style.mixBlendMode = 'normal';
+        }
+      });
+      
+      // Clean up acrylic overlays for cart display
+      clonedSvg.querySelectorAll('g').forEach((group: any) => {
+        // Remove overlay groups that were added for acrylic effects
+        if (group.getAttribute('clip-path') && !group.id && !group.getAttribute('data-role')) {
+          // This is likely an overlay group, simplify it
+          group.style.opacity = '0.3';
+          group.style.mixBlendMode = 'normal';
+        }
+      });
+      
       // Ensure proper sizing attributes
       clonedSvg.setAttribute('width', '100%');
       clonedSvg.setAttribute('height', '100%');
       clonedSvg.style.maxWidth = '100%';
       clonedSvg.style.maxHeight = '100%';
+      clonedSvg.style.background = 'transparent';
       
       return clonedSvg.outerHTML;
     } catch (error) {
@@ -86,11 +105,11 @@ const SVGPreview: React.FC<SVGPreviewProps> = ({
     if (hasUploadedSvg && uploadedSvgContent) {
       return (
         <div 
-          className={`${className} bg-white border-2 border-gray-200 rounded-lg p-2 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow group relative`}
+          className={`${className} bg-gray-50 border-2 border-gray-200 rounded-lg p-1 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow group relative`}
           onClick={handlePreviewClick}
         >
           <div 
-            className="max-w-full max-h-full [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto"
+            className="max-w-full max-h-full [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto [&>svg]:object-contain"
             dangerouslySetInnerHTML={{ __html: uploadedSvgContent }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 rounded-lg flex items-center justify-center">
@@ -103,7 +122,7 @@ const SVGPreview: React.FC<SVGPreviewProps> = ({
     // Fallback to mockup image
     return (
       <div 
-        className={`${className} bg-white border-2 border-gray-200 rounded-lg p-2 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow group relative`}
+        className={`${className} bg-gray-50 border-2 border-gray-200 rounded-lg p-1 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow group relative`}
         onClick={handlePreviewClick}
       >
         <img
@@ -145,10 +164,10 @@ const SVGPreview: React.FC<SVGPreviewProps> = ({
 
             {/* Content */}
             <div className="p-6 overflow-auto max-h-[calc(90vh-120px)]">
-              <div className="flex items-center justify-center min-h-[400px] bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-center min-h-[400px] bg-gray-100 rounded-lg p-4">
                 {hasUploadedSvg && uploadedSvgContent ? (
                   <div 
-                    className="max-w-full max-h-full [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto"
+                    className="max-w-full max-h-full [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:w-auto [&>svg]:h-auto bg-white rounded-lg p-4 shadow-lg"
                     style={{ maxWidth: '800px', maxHeight: '600px' }}
                     dangerouslySetInnerHTML={{ __html: uploadedSvgContent }}
                   />
