@@ -785,7 +785,7 @@ function NeonConfiguratorApp() {
                     <label className="block text-sm font-semibold text-gray-700 mb-1">Breite</label>
                     <div className="flex items-center space-x-2 mb-1">
                       <input
-                        type="number"
+                    <div className="relative bg-transparent h-[600px] pt-20 flex items-center justify-center w-full overflow-hidden">
                         min="30"
                         max={effectiveMaxWidth}
                         value={config.customWidth}
