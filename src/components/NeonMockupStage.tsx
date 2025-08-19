@@ -98,7 +98,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   const [localNeon, setLocalNeon]   = useState(neonIntensity ?? 1.50);
   const [localNeonOn, setLocalNeonOn] = useState(neonOn);
   
-  // Neon-Intensität Slider Animation
+  // Neon-Intensität Slider Animation (Hover + Timer)
   const [showNeonSlider, setShowNeonSlider] = useState(false);
   const neonSliderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -112,8 +112,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
   const [drag, setDrag] = useState({dx:0, dy:0});
 
-  // Neon-Intensität Slider Auto-Hide
-  const showNeonSliderFor4Seconds = () => {
+  // Neon-Intensität Slider Auto-Hide (2 Sekunden)
+  const showNeonSliderFor2Seconds = () => {
     setShowNeonSlider(true);
     
     // Clear existing timeout
@@ -121,7 +121,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       clearTimeout(neonSliderTimeoutRef.current);
     }
     
-    // Set new timeout for 4 seconds
+    // Set new timeout for 2 seconds
     neonSliderTimeoutRef.current = setTimeout(() => {
       setShowNeonSlider(false);
     }, 2000);
@@ -573,69 +573,86 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       {/* Technische Ansicht Button */}
       {/* Neon An/Aus Toggle - Floating Button */}
       {!showTechnicalView && (
-        <button
-          onClick={() => {
-            const newValue = !localNeonOn;
-            setLocalNeonOn(newValue);
-            toggleNeon(svgRef.current, newValue, neonIntensity ?? localNeon);
-            // Show intensity slider for 4 seconds when toggling neon
-            showNeonSliderFor4Seconds();
-          }}
-          className={`absolute top-4 left-4 z-10 w-12 h-12 rounded-full backdrop-blur-sm border transition-all duration-300 flex items-center justify-center shadow-lg ${
-            localNeonOn
-              ? 'bg-yellow-500/90 text-white border-yellow-400 hover:bg-yellow-600/90'
-              : 'bg-gray-800/90 text-gray-300 border-gray-600 hover:bg-gray-700/90'
-          }`}
-          title={localNeonOn ? 'Neon ausschalten' : 'Neon einschalten'}
-        >
-          {localNeonOn ? (
-            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
-            </svg>
-          ) : (
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-            </svg>
-          )}
-        </button>
-      )}
-
-      {/* Neon-Intensität Slider - Versteckt mit Animation */}
-      {!showTechnicalView && (
         <div 
-          className={`absolute top-20 left-4 z-10 transition-all duration-500 ease-in-out ${
-            showNeonSlider 
-              ? 'opacity-100 translate-y-0' 
-              : 'opacity-0 translate-y-2 pointer-events-none'
-          }`}
+          className="absolute top-4 left-4 z-10"
+          onMouseEnter={showNeonSliderFor2Seconds}
+          onMouseLeave={() => {
+            // Clear timeout when mouse leaves the area
+            if (neonSliderTimeoutRef.current) {
+              clearTimeout(neonSliderTimeoutRef.current);
+            }
+            // Hide after short delay
+            neonSliderTimeoutRef.current = setTimeout(() => {
+              setShowNeonSlider(false);
+            }, 300);
+          }}
         >
-          <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-3 shadow-lg min-w-[140px]">
-            <div className="flex items-center space-x-2 mb-2">
-              <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+          <button
+            onClick={() => {
+              const newValue = !localNeonOn;
+              setLocalNeonOn(newValue);
+              toggleNeon(svgRef.current, newValue, neonIntensity ?? localNeon);
+              // Show intensity slider for 2 seconds when toggling neon
+              showNeonSliderFor2Seconds();
+            }}
+            className={`w-12 h-12 rounded-full backdrop-blur-sm border transition-all duration-300 flex items-center justify-center shadow-lg ${
+              localNeonOn
+                ? 'bg-yellow-500/90 text-white border-yellow-400 hover:bg-yellow-600/90'
+                : 'bg-gray-800/90 text-gray-300 border-gray-600 hover:bg-gray-700/90'
+            }`}
+            title={localNeonOn ? 'Neon ausschalten' : 'Neon einschalten'}
+          >
+            {localNeonOn ? (
+              // Lampe AN - Gefüllte Glühbirne
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
               </svg>
-              <span className="text-xs font-medium text-gray-700">Intensität</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-500">💫</span>
-              <input 
-                type="range" 
-                min={0.40} 
-                max={2.00} 
-                step={0.05}
-                value={localNeon}
-                className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                onChange={(e) => {
-                  const newIntensity = parseFloat(e.target.value);
-                  setLocalNeon(newIntensity);
-                  toggleNeon(svgRef.current, localNeonOn, newIntensity);
-                }}
-                title={`Neon-Intensität: ${(localNeon * 100).toFixed(0)}%`}
-              />
-              <span className="text-xs text-gray-500">🔥</span>
-            </div>
-            <div className="text-center mt-1">
-              <span className="text-xs font-medium text-blue-600">{(localNeon * 100).toFixed(0)}%</span>
+            ) : (
+              // Lampe AUS - Outline Glühbirne
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            )}
+          </button>
+
+          {/* Neon-Intensität Slider - Versteckt mit Animation */}
+          <div 
+            className={`mt-2 transition-all duration-500 ease-in-out ${
+              showNeonSlider 
+                ? 'opacity-100 translate-y-0' 
+                : 'opacity-0 translate-y-2 pointer-events-none'
+            }`}
+          >
+            <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-3 shadow-lg min-w-[140px]">
+              <div className="flex items-center space-x-2 mb-2">
+                <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
+                </svg>
+                <span className="text-xs font-medium text-gray-700">Intensität</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-500">💫</span>
+                <input 
+                  type="range" 
+                  min={0.40} 
+                  max={2.00} 
+                  step={0.05}
+                  value={localNeon}
+                  className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  onChange={(e) => {
+                    const newIntensity = parseFloat(e.target.value);
+                    setLocalNeon(newIntensity);
+                    toggleNeon(svgRef.current, localNeonOn, newIntensity);
+                    // Extend visibility when using slider
+                    showNeonSliderFor2Seconds();
+                  }}
+                  title={`Neon-Intensität: ${(localNeon * 100).toFixed(0)}%`}
+                />
+                <span className="text-xs text-gray-500">🔥</span>
+              </div>
+              <div className="text-center mt-1">
+                <span className="text-xs font-medium text-blue-600">{(localNeon * 100).toFixed(0)}%</span>
+              </div>
             </div>
           </div>
         </div>
