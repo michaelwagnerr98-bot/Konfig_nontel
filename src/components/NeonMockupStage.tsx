@@ -13,17 +13,17 @@ type NeonMockupStageProps = {
 
 // Reale Wandbreiten für jede Szene in cm
 const SCENE_REAL_WIDTHS_CM: Record<string, number> = {
-  "ab_20cm_50%": 300,    // 3 Meter Wandbreite
-  "ab_100cm_50%": 500,   // 5 Meter Wandbreite  
-  "ab_200cm_50%": 700,   // 7 Meter Wandbreite
+  "ab_20cm_50%": 250,    // 2,5 Meter Wandbreite
+  "ab_100cm_50%": 400,   // 4 Meter Wandbreite  
+  "ab_200cm_50%": 500,   // 5 Meter Wandbreite
   "outdoor_30%": 2000,   // 20 Meter Außenbereich
 };
 
 // Verfügbare Hintergründe mit Labels
 const AVAILABLE_BACKGROUNDS = [
-  { key: "ab_20cm_50%", label: "Klein (3m)", description: "Kleiner Raum" },
-  { key: "ab_100cm_50%", label: "Mittel (5m)", description: "Mittlerer Raum" },
-  { key: "ab_200cm_50%", label: "Groß (7m)", description: "Großer Raum" },
+  { key: "ab_20cm_50%", label: "Klein (2,5m)", description: "Kleiner Raum" },
+  { key: "ab_100cm_50%", label: "Mittel (4m)", description: "Mittlerer Raum" },
+  { key: "ab_200cm_50%", label: "Groß (5m)", description: "Großer Raum" },
   { key: "outdoor_30%", label: "Outdoor (20m)", description: "Außenbereich" },
 ];
 
