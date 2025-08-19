@@ -687,32 +687,6 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       </div>
 
       {/* Neon-Intensität Slider - Vertikal unter Neon-Button */}
-      {neonIntensity === undefined && !showTechnicalView && (
-        <div className="absolute top-20 left-4 z-10 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg p-2 shadow-lg">
-          <div className="flex flex-col items-center space-y-2">
-            <div className="text-xs font-medium text-gray-700 writing-mode-vertical transform rotate-180">
-              Intensität
-            </div>
-            <input
-              type="range"
-              min={0.40}
-              max={2.00}
-              step={0.01}
-              value={localNeon}
-              onChange={(e) => {
-                const v = parseFloat(e.currentTarget.value);
-                setLocalNeon(v);
-                toggleNeon(svgRef.current, localNeonOn, v);
-              }}
-              className="w-20 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider transform -rotate-90 origin-center"
-              style={{ writingMode: 'bt-lr' }}
-            />
-            <div className="text-xs text-gray-600 font-medium">
-              {(localNeon * 100).toFixed(0)}%
-            </div>
-          </div>
-        </div>
-      )}
     </div>
 
     {/* Hintergrund-Auswahl - Unten links, klein und kompakt */}
