@@ -210,6 +210,9 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                 <div className="text-xs text-blue-600 font-medium mt-1">
                   Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
                 </div>
+                <div className="text-xs text-blue-600 font-medium mt-1">
+                  Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
+                </div>
               </div>
               <div className="relative group">
                 <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors flex-shrink-0" />
