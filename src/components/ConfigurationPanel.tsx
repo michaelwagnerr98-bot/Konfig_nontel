@@ -217,6 +217,9 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
                   Dafür werden zusätzliche Kosten berechnet. Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
                   <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                 </div>
+              </div>
+            </div>
+          </div>
 
           <label className="flex items-start space-x-3 cursor-pointer p-2 md:p-0 hover:bg-gray-50 md:hover:bg-transparent rounded-lg md:rounded-none transition-colors">
             <input
