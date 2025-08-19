@@ -135,6 +135,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     onBackgroundChange?.(newBackground);
     // Reset drag position when changing background
     setDrag({dx: 0, dy: 0});
+    // Auto-close options menu
+    setOpen(false);
   };
 
   const S: Record<string, React.CSSProperties> = {
@@ -589,7 +591,10 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 Zentrieren
               </button>
               <button 
-                onClick={handlePickSvg} 
+                onClick={() => {
+                  handlePickSvg();
+                  setOpen(false);
+                }}
                 className="w-full px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm font-medium transition-colors"
               >
                 SVG laden…
@@ -605,7 +610,11 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   step={0.01}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   defaultValue={localBg}
-                  onChange={(e)=> setLocalBg(parseFloat(e.currentTarget.value))}
+                  onChange={(e)=> {
+                    setLocalBg(parseFloat(e.currentTarget.value));
+                    // Auto-close after short delay for sliders
+                    setTimeout(() => setOpen(false), 1000);
+                  }}
                 />
               </div>
             )}
@@ -619,7 +628,13 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   step={0.01}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   defaultValue={localNeon}
-                  onChange={(e)=>{ const v=parseFloat(e.currentTarget.value); setLocalNeon(v); toggleNeon(svgRef.current, localNeonOn, v); }}
+                  onChange={(e)=>{ 
+                    const v=parseFloat(e.currentTarget.value); 
+                    setLocalNeon(v); 
+                    toggleNeon(svgRef.current, localNeonOn, v);
+                    // Auto-close after short delay for sliders
+                    setTimeout(() => setOpen(false), 1000);
+                  }}
                 />
               </div>
             )}
@@ -630,7 +645,13 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 <input
                   type="checkbox"
                   checked={localNeonOn}
-                  onChange={(e)=>{ const v=e.currentTarget.checked; setLocalNeonOn(v); toggleNeon(svgRef.current, v, neonIntensity ?? localNeon); }}
+                  onChange={(e)=>{ 
+                    const v=e.currentTarget.checked; 
+                    setLocalNeonOn(v); 
+                    toggleNeon(svgRef.current, v, neonIntensity ?? localNeon);
+                    // Auto-close options menu
+                    setOpen(false);
+                  }}
                   className="sr-only"
                 />
                 <div className={`relative w-11 h-6 rounded-full transition-colors ${
