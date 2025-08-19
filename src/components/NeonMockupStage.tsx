@@ -216,6 +216,25 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     });
     addAcrylicOverlays(svg, g);
   }
+  
+  // Technische Ansicht für Acryl (schwarz, 60% transparent)
+  function processTechnicalAcrylic(svg:SVGSVGElement){
+    const g = qRole(svg,"acrylic","acrylic");
+    if(!g) return;
+    g.querySelectorAll("path, polygon, rect, ellipse, circle").forEach((el:any)=>{
+      el.removeAttribute("fill"); el.removeAttribute("fill-opacity");
+      el.style.fill="rgba(0,0,0,0.6)"; // Schwarz, 60% transparent
+      el.setAttribute("fill","rgba(0,0,0,0.6)");
+      el.setAttribute("stroke","rgba(0,0,0,0.8)"); // Schwarzer Rand
+      el.setAttribute("stroke-width","1");
+      el.setAttribute("stroke-linecap","round");
+      el.setAttribute("stroke-linejoin","round");
+    });
+    // Entferne Acryl-Overlays in technischer Ansicht
+    g.parentElement?.querySelectorAll('g[clip-path]').forEach(overlay => {
+      if (overlay !== g) overlay.remove();
+    });
+  }
 
   // Neon
   function isNeonCandidate(el:Element){
@@ -251,6 +270,22 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       el.setAttribute("stroke", tube);
       el.setAttribute("stroke-linecap","round"); el.setAttribute("stroke-linejoin","round");
       applyNeonGlow(el, el.getAttribute("data-neoncolor")||"#fff", enabled, intensity);
+    });
+  }
+  
+  // Technische Ansicht für Neon (originale Farben, keine Effekte)
+  function processTechnicalNeon(svg:SVGSVGElement){
+    const root = (svg.querySelector("#neon, [data-role='neon']") as SVGGElement) || svg;
+    const cand = Array.from(root.querySelectorAll("path, polyline, line, circle, ellipse")).filter(isNeonCandidate) as HTMLElement[];
+    cand.forEach(el=>{
+      const originalColor = el.getAttribute("data-neoncolor") || getStroke(el);
+      el.setAttribute("fill","none"); 
+      el.style.fill="none";
+      el.setAttribute("stroke", originalColor); // Originale Farbe
+      el.setAttribute("stroke-width", "2"); // Standard Strichstärke
+      el.setAttribute("stroke-linecap","round"); 
+      el.setAttribute("stroke-linejoin","round");
+      el.style.filter = "none"; // Keine Neon-Effekte
     });
   }
   function toggleNeon(svg:SVGSVGElement|null, enabled:boolean, intensity:number){
@@ -385,12 +420,19 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     setShowTechnicalView(prev => {
       const newValue = !prev;
       if (newValue) {
-        // In technischer Ansicht: Neon aus, zentrieren
-        toggleNeon(svgRef.current, false, neonIntensity ?? localNeon);
+        // In technischer Ansicht: Originale Darstellung
+        if (svgRef.current) {
+          processTechnicalAcrylic(svgRef.current);
+          processTechnicalNeon(svgRef.current);
+        }
         setDrag({dx: 0, dy: 0});
       } else {
-        // Zurück zur normalen Ansicht: Neon wieder an (falls es vorher an war)
-        toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
+        // Zurück zur normalen Ansicht: Alle Effekte neu anwenden
+        if (svgRef.current) {
+          processAcrylic(svgRef.current);
+          processNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
+          processUV(svgRef.current, uvOn);
+        }
       }
       return newValue;
     });
@@ -501,69 +543,90 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       </div>
 
       {/* Technische Ansicht Button */}
-      <div className="absolute top-4 right-4 z-10 flex flex-col space-y-2">
+      {/* Neon An/Aus Toggle - Floating Button */}
+      {!showTechnicalView && (
+        <button
+          onClick={() => {
+            const newValue = !localNeonOn;
+            setLocalNeonOn(newValue);
+            toggleNeon(svgRef.current, newValue, neonIntensity ?? localNeon);
+          }}
+          className={`absolute top-4 left-4 z-10 w-12 h-12 rounded-full backdrop-blur-sm border transition-all duration-300 flex items-center justify-center shadow-lg ${
+            localNeonOn
+              ? 'bg-yellow-500/90 text-white border-yellow-400 hover:bg-yellow-600/90'
+              : 'bg-gray-800/90 text-gray-300 border-gray-600 hover:bg-gray-700/90'
+          }`}
+          title={localNeonOn ? 'Neon ausschalten' : 'Neon einschalten'}
+        >
+          {localNeonOn ? (
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          )}
+        </button>
+      )}
+
+      {/* Kompakte Button-Leiste */}
+      <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">
         <button
           onClick={toggleTechnicalView}
-          className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 border backdrop-blur-sm flex items-center space-x-2 ${
+          className={`w-10 h-10 rounded-lg transition-all duration-300 border backdrop-blur-sm flex items-center justify-center shadow-lg ${
             showTechnicalView
-              ? 'bg-blue-600 text-white border-blue-500 shadow-lg'
-              : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white hover:shadow-md'
+              ? 'bg-blue-600 text-white border-blue-500'
+              : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white'
           }`}
           title={showTechnicalView ? 'Zurück zur Neon-Ansicht' : 'Technische Skizze anzeigen'}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <span>{showTechnicalView ? 'Neon-Ansicht' : 'Technische Skizze'}</span>
         </button>
         
         {showTechnicalView && (
           <button
             onClick={downloadTechnicalSVG}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium text-sm transition-all duration-300 shadow-lg flex items-center space-x-2"
+            className="w-10 h-10 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center"
             title="Original SVG-Datei herunterladen"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span>Original SVG</span>
           </button>
         )}
 
         <button 
           onClick={openZoomModal}
-          className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium text-sm transition-all duration-300 shadow-lg flex items-center space-x-2"
+          className="w-10 h-10 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center"
           title="Vollbild-Ansicht öffnen"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
           </svg>
-          <span>Vollbild</span>
         </button>
 
-        <button 
+        {!showTechnicalView && <button 
           onClick={()=>setOpen(v=>!v)}
-          className={`flex items-center space-x-2 px-3 py-2 rounded-lg font-medium text-sm transition-all duration-300 border backdrop-blur-sm mt-2 ${
+          className={`w-10 h-10 rounded-lg transition-all duration-300 border backdrop-blur-sm flex items-center justify-center shadow-lg ${
             open 
-              ? 'bg-blue-600 text-white border-blue-500 shadow-lg' 
-              : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white hover:shadow-md'
+              ? 'bg-blue-600 text-white border-blue-500' 
+              : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white'
           }`}
+          title="Weitere Optionen"
         >
-          <div className={`w-4 h-4 rounded-full transition-colors ${
-            open ? 'bg-white/20' : 'bg-gray-400'
-          }`}>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <span>Optionen</span>
-        </button>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>}
       </div>
 
       {/* Technical View Indicator */}
       {showTechnicalView && (
-        <div className="absolute bottom-4 left-4 z-10 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg flex items-center space-x-2">
+        <div className="absolute bottom-4 left-4 z-10 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg flex items-center space-x-2">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -573,8 +636,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
       {/* Vollbild hint */}
       {!showTechnicalView && (
-        <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-3 py-1 rounded-lg text-xs backdrop-blur-sm">
-          Vollbild-Button für Details
+        <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
+          💡 Vollbild für Details
         </div>
       )}
 
@@ -582,11 +645,11 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       <div className="absolute top-16 right-4 z-10">
         
         {open && (
-          <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 p-4 min-w-[220px] backdrop-blur-sm">
+          <div className="absolute top-full right-0 mt-2 bg-white/95 rounded-lg shadow-xl border border-gray-200 p-3 min-w-[200px] backdrop-blur-sm">
             <div className="space-y-3">
               <button 
                 onClick={()=> setDrag({dx:0,dy:0})} 
-                className="w-full px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors"
+                className="w-full px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors"
               >
                 Zentrieren
               </button>
@@ -595,20 +658,20 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   handlePickSvg();
                   setOpen(false);
                 }}
-                className="w-full px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm font-medium transition-colors"
+                className="w-full px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm font-medium transition-colors"
               >
                 SVG laden…
               </button>
 
             {bgBrightness===undefined && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">BG-Helligkeit</label>
+                <label className="text-xs font-medium text-gray-700">BG-Helligkeit</label>
                 <input 
                   type="range" 
                   min={0.30} 
                   max={1.60} 
                   step={0.01}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   defaultValue={localBg}
                   onChange={(e)=> {
                     setLocalBg(parseFloat(e.currentTarget.value));
@@ -620,13 +683,13 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
             )}
             {neonIntensity===undefined && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Neon-Intensität</label>
+                <label className="text-xs font-medium text-gray-700">Neon-Intensität</label>
                 <input 
                   type="range" 
                   min={0.40} 
                   max={2.00} 
                   step={0.01}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   defaultValue={localNeon}
                   onChange={(e)=>{ 
                     const v=parseFloat(e.currentTarget.value); 
@@ -638,41 +701,16 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 />
               </div>
             )}
-            {/* Neon An/Aus – sofort nutzbar */}
-            {!showTechnicalView && <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700">Neon an</label>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={localNeonOn}
-                  onChange={(e)=>{ 
-                    const v=e.currentTarget.checked; 
-                    setLocalNeonOn(v); 
-                    toggleNeon(svgRef.current, v, neonIntensity ?? localNeon);
-                    // Auto-close options menu
-                    setOpen(false);
-                  }}
-                  className="sr-only"
-                />
-                <div className={`relative w-11 h-6 rounded-full transition-colors ${
-                  localNeonOn ? 'bg-blue-600' : 'bg-gray-200'
-                }`}>
-                  <div className={`absolute top-0.5 left-0.5 bg-white w-5 h-5 rounded-full transition-transform ${
-                    localNeonOn ? 'transform translate-x-5' : ''
-                  }`}></div>
-                </div>
-              </label>
-            </div>}
 
             {/* Hintergrund-Auswahl */}
             {!showTechnicalView && <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Hintergrund</label>
-              <div className="grid grid-cols-2 gap-1">
+              <label className="text-xs font-medium text-gray-700">Hintergrund</label>
+              <div className="grid grid-cols-2 gap-1.5">
                 {AVAILABLE_BACKGROUNDS.map((bg) => (
                   <button
                     key={bg.key}
                     onClick={() => handleBackgroundChange(bg.key)}
-                    className={`px-2 py-1.5 text-xs rounded-md font-medium transition-colors ${
+                    className={`px-2 py-1 text-xs rounded-md font-medium transition-colors ${
                       currentBackground === bg.key
                         ? 'bg-blue-600 text-white'
                         : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
@@ -772,10 +810,17 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   onPointerCancel={modalZoom > 1 ? handleModalPointerUp : undefined}
                   dangerouslySetInnerHTML={{ 
                     __html: (() => {
-                      // Parse and display original SVG
+                      // Parse original SVG und wende technische Darstellung an
                       const doc = new DOMParser().parseFromString(originalSvgRef.current, "image/svg+xml");
                       const svg = doc.querySelector("svg") as SVGSVGElement | null;
                       if (!svg) return '<p>SVG konnte nicht geladen werden</p>';
+                      
+                      // Technische Darstellung anwenden
+                      sanitize(svg);
+                      ensureViewBox(svg);
+                      processTechnicalAcrylic(svg);
+                      processTechnicalNeon(svg);
+                      processUV(svg, uvOn);
                       
                       svg.setAttribute('width', '100%');
                       svg.setAttribute('height', '100%');
