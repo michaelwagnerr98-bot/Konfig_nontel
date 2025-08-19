@@ -98,6 +98,10 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   const [localNeon, setLocalNeon]   = useState(neonIntensity ?? 1.40);
   const [localNeonOn, setLocalNeonOn] = useState(neonOn);
   
+  // Neon-Intensität Slider Animation
+  const [showNeonSlider, setShowNeonSlider] = useState(false);
+  const neonSliderTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   // Technische Ansicht und Vollbild States
   const [showTechnicalView, setShowTechnicalView] = useState(false);
   const [showZoomModal, setShowZoomModal] = useState(false);
@@ -107,6 +111,30 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   useEffect(()=>{ setLocalNeonOn(neonOn); }, [neonOn]);
 
   const [drag, setDrag] = useState({dx:0, dy:0});
+
+  // Neon-Intensität Slider Auto-Hide
+  const showNeonSliderFor4Seconds = () => {
+    setShowNeonSlider(true);
+    
+    // Clear existing timeout
+    if (neonSliderTimeoutRef.current) {
+      clearTimeout(neonSliderTimeoutRef.current);
+    }
+    
+    // Set new timeout for 4 seconds
+    neonSliderTimeoutRef.current = setTimeout(() => {
+      setShowNeonSlider(false);
+    }, 4000);
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (neonSliderTimeoutRef.current) {
+        clearTimeout(neonSliderTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Verwende manuell gewählten Hintergrund statt automatischer Auswahl
   const setName = currentBackground;
@@ -550,6 +578,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
             const newValue = !localNeonOn;
             setLocalNeonOn(newValue);
             toggleNeon(svgRef.current, newValue, neonIntensity ?? localNeon);
+            // Show intensity slider for 4 seconds when toggling neon
+            showNeonSliderFor4Seconds();
           }}
           className={`absolute top-4 left-4 z-10 w-12 h-12 rounded-full backdrop-blur-sm border transition-all duration-300 flex items-center justify-center shadow-lg ${
             localNeonOn
@@ -568,6 +598,49 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
             </svg>
           )}
         </button>
+      )}
+
+      {/* Neon-Intensität Slider - Versteckt mit Animation */}
+      {!showTechnicalView && (
+        <div 
+          className={`absolute top-20 left-4 z-10 transition-all duration-500 ease-in-out ${
+            showNeonSlider 
+              ? 'opacity-100 translate-y-0' 
+              : 'opacity-0 translate-y-2 pointer-events-none'
+          }`}
+        >
+          <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-3 shadow-lg min-w-[140px]">
+            <div className="flex items-center space-x-2 mb-2">
+              <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
+              </svg>
+              <span className="text-xs font-medium text-gray-700">Intensität</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-500">💫</span>
+              <input 
+                type="range" 
+                min={0.40} 
+                max={2.00} 
+                step={0.05}
+                value={localNeon}
+                className="flex-1 h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                onChange={(e) => {
+                  const newIntensity = parseFloat(e.target.value);
+                  setLocalNeon(newIntensity);
+                  toggleNeon(svgRef.current, localNeonOn, newIntensity);
+                  // Extend visibility when using slider
+                  showNeonSliderFor4Seconds();
+                }}
+                title={`Neon-Intensität: ${(localNeon * 100).toFixed(0)}%`}
+              />
+              <span className="text-xs text-gray-500">🔥</span>
+            </div>
+            <div className="text-center mt-1">
+              <span className="text-xs font-medium text-blue-600">{(localNeon * 100).toFixed(0)}%</span>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Kompakte Button-Leiste */}
@@ -662,25 +735,6 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
               >
                 SVG laden…
               </button>
-
-            {bgBrightness===undefined && (
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-700">BG-Helligkeit</label>
-                <input 
-                  type="range" 
-                  min={0.30} 
-                  max={1.60} 
-                  step={0.01}
-                  className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                  defaultValue={localBg}
-                  onChange={(e)=> {
-                    setLocalBg(parseFloat(e.currentTarget.value));
-                    // Auto-close after short delay for sliders
-                    setTimeout(() => setOpen(false), 1000);
-                  }}
-                />
-              </div>
-            )}
             </div>
           </div>
         )}
