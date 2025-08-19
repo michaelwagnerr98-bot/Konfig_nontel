@@ -174,7 +174,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     planeWrap:{position:"absolute", inset:0, zIndex:2, pointerEvents:"none"},
     plane:{
       position:"absolute", left:"50%", top:"50%",
-      transform:`translate(-50%,-40%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`,
+      transform:`translate(-50%,-30%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`,
       width:"600px", height:"600px", display:"grid", placeItems:"center",
       filter:"drop-shadow(0 6px 14px rgba(0,0,0,.35))", cursor:"grab", pointerEvents:"auto", userSelect:"none", touchAction:"none"
     },
@@ -424,7 +424,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   useEffect(()=>{ toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon); }, [localNeonOn, neonIntensity, localNeon, setName]);
   useEffect(()=>{ // Drag → Transform anpassen
     planeRef.current && (planeRef.current.style.transform =
-      `translate(-50%,-40%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`);
+      `translate(-50%,-30%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`);
   }, [drag.dx, drag.dy]);
 
   const [open, setOpen] = useState(false);
@@ -559,7 +559,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
           ref={planeRef}
           style={{
             ...S.plane,
-            transform: `translate(-50%,-40%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`,
+            transform: `translate(-50%,-30%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`,
             cursor: showTechnicalView ? 'default' : 'grab'
           }}
           onPointerDown={onPointerDown}
