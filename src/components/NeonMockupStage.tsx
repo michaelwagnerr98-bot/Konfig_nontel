@@ -629,8 +629,6 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   const newIntensity = parseFloat(e.target.value);
                   setLocalNeon(newIntensity);
                   toggleNeon(svgRef.current, localNeonOn, newIntensity);
-                  // Extend visibility when using slider
-                  showNeonSliderFor4Seconds();
                 }}
                 title={`Neon-Intensität: ${(localNeon * 100).toFixed(0)}%`}
               />
