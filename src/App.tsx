@@ -724,11 +724,14 @@ function NeonConfiguratorApp() {
                       <div className="flex items-center space-x-2 animate-pulse">
                         <div className="bg-green-500 rounded-full p-0.5">
                           <svg className="w-4 h-4 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="text-xs text-blue-600 font-medium mt-1">
+                          Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
+                        </div>
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
                         <span className="text-green-800 font-bold text-base animate-pulse">Im Warenkorb</span>
-                        <div className="text-base font-bold text-green-800">
+                          Dafür werden zusätzliche Kosten berechnet.<br/>Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
                           €{currentDesignPrice.toFixed(2)}
                         </div>
                       </div>
