@@ -7,10 +7,19 @@ type NeonMockupStageProps = {
   uvOn: boolean;          // UV-Druck an/aus (von deinem UI)
   bgBrightness?: number;  // 0.30–1.60 (optional extern gesteuert)
   neonIntensity?: number; // 0.40–2.00 (optional extern gesteuert)
-  sceneZoom?: number;     // 0.30–1.50 (optional extern gesteuert)
 };
 
-const PX_PER_CM = 37.79527559;
+// Reale Wandbreiten für jede Szene in cm
+const SCENE_REAL_WIDTHS_CM: Record<string, number> = {
+  "ab_20cm_50%": 300,    // 3 Meter Wandbreite
+  "ab_100cm_50%": 500,   // 5 Meter Wandbreite  
+  "ab_200cm_50%": 700,   // 7 Meter Wandbreite
+  "outdoor_30%": 2000,   // 20 Meter Außenbereich
+};
+
+// Referenz-Viewport-Breite für Skalierung (Pixel)
+const VIEWPORT_WIDTH_FOR_SCALING_PX = 400;
+
 const INDOOR_BASE = 0.50;     // „50% kleiner“
 const OUTDOOR_BASE = 0.30;    // „70% kleiner“
 const GLOW_RADII_BASE = [1.9, 3.8, 6.6, 9.8];
@@ -64,7 +73,7 @@ function sanitize(svg:SVGSVGElement){
 
 const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   lengthCm, waterproof, neonOn, uvOn,
-  bgBrightness, neonIntensity, sceneZoom
+  bgBrightness, neonIntensity
 }) => {
   const planeRef = useRef<HTMLDivElement>(null);
   const svgRef   = useRef<SVGSVGElement|null>(null);
@@ -72,7 +81,6 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
   // Fallback-States (falls Props nicht gesetzt sind)
   const [localBg, setLocalBg]       = useState(bgBrightness ?? 1.0);
   const [localNeon, setLocalNeon]   = useState(neonIntensity ?? 1.40);
-  const [localZoom, setLocalZoom]   = useState(sceneZoom ?? 1.00);
   const [localNeonOn, setLocalNeonOn] = useState(neonOn);
   useEffect(()=>{ setLocalNeonOn(neonOn); }, [neonOn]);
 
@@ -80,7 +88,20 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
   const setName   = useMemo(()=>pickSet(lengthCm, waterproof), [lengthCm, waterproof]);
   const baseScale = setName==="outdoor_30%" ? OUTDOOR_BASE : INDOOR_BASE;
-  const effZoom   = baseScale * (sceneZoom ?? localZoom);
+  
+  // Dynamische Pixel-pro-Zentimeter Berechnung basierend auf realer Szenenbreite
+  const dynamicPxPerCm = useMemo(() => {
+    const realSceneWidthCm = SCENE_REAL_WIDTHS_CM[setName] || 300;
+    // Berechne Pixel pro cm: Viewport-Breite / reale Szenenbreite * baseScale
+    const pxPerCm = (VIEWPORT_WIDTH_FOR_SCALING_PX / realSceneWidthCm) * baseScale;
+    console.log(`📏 Dynamische Skalierung für ${setName}:`, {
+      realSceneWidthCm,
+      viewportWidth: VIEWPORT_WIDTH_FOR_SCALING_PX,
+      baseScale,
+      calculatedPxPerCm: pxPerCm
+    });
+    return pxPerCm;
+  }, [setName, baseScale]);
 
   const S: Record<string, React.CSSProperties> = {
     scene:{position:"relative", inset:0, width:"100%", height:"100%", background:"#000", overflow:"hidden", borderRadius:12},
@@ -89,7 +110,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     planeWrap:{position:"absolute", inset:0, zIndex:2, pointerEvents:"none"},
     plane:{
       position:"absolute", left:"50%", top:"50%",
-      transform:`translate(-50%,-50%) translate(${(drag.dx/effZoom).toFixed(2)}px, ${(drag.dy/effZoom).toFixed(2)}px) scale(${effZoom})`,
+      transform:`translate(-50%,-50%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`,
       width:"600px", height:"600px", display:"grid", placeItems:"center",
       filter:"drop-shadow(0 6px 14px rgba(0,0,0,.35))", cursor:"grab", pointerEvents:"auto", userSelect:"none", touchAction:"none"
     },
@@ -213,16 +234,24 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     if(!svgRef.current || !planeRef.current) return;
     const vb = svgRef.current.getAttribute("viewBox")!.split(/\s+/).map(Number);
     const asp = (vb[2]>0 && vb[3]>0) ? (vb[2]/vb[3]) : 1;
-    const pxLong = cm*PX_PER_CM;
+    const pxLong = cm * dynamicPxPerCm;
     let w:number,h:number;
     if(asp>=1){ w = pxLong; h = w/asp; } else { h = pxLong; w = h*asp; }
+    console.log(`📐 SVG Größe gesetzt:`, {
+      lengthCm: cm,
+      dynamicPxPerCm,
+      calculatedPxLong: pxLong,
+      finalWidth: w,
+      finalHeight: h,
+      aspectRatio: asp
+    });
     planeRef.current.style.width  = `${w.toFixed(2)}px`;
     planeRef.current.style.height = `${h.toFixed(2)}px`;
   }
 
   // Drag ohne Boden-Grenze (nur Randclamp)
   function clampToScene(nextDX:number, nextDY:number){
-    const s = effZoom;
+    const s = 1; // Feste Skalierung, da dynamicPxPerCm bereits die Größe steuert
     const sceneRect = (planeRef.current!.parentElement as HTMLElement).getBoundingClientRect();
     const pw = parseFloat(planeRef.current!.style.width)  || planeRef.current!.clientWidth;
     const ph = parseFloat(planeRef.current!.style.height) || planeRef.current!.clientHeight;
@@ -246,7 +275,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     dd.current.baseDX = drag.dx;   dd.current.baseDY = drag.dy;
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     dd.current.neonWasOn = localNeonOn;
-    if(localNeonOn) toggleNeon(svgRef.current, false, (neonIntensity ?? localNeon)); // Auto-Off
+    if(localNeonOn) toggleNeon(svgRef.current, false, neonIntensity ?? localNeon); // Auto-Off
   }
   function onPointerMove(e:React.PointerEvent){
     if(!dd.current.dragging) return;
@@ -259,7 +288,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
     if(!dd.current.dragging) return;
     dd.current.dragging=false;
     try{ (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId); }catch{}
-    if(dd.current.neonWasOn) setTimeout(()=>toggleNeon(svgRef.current, true, (neonIntensity ?? localNeon)), 40); // Auto-On
+    if(dd.current.neonWasOn) setTimeout(()=>toggleNeon(svgRef.current, true, neonIntensity ?? localNeon), 40); // Auto-On
   }
 
   // SVG-Loader im Overlay
@@ -280,19 +309,20 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
       processAcrylic(svg);
       processUV(svg, uvOn);
-      processNeon(svg, localNeonOn, (neonIntensity ?? localNeon));
+      processNeon(svg, localNeonOn, neonIntensity ?? localNeon);
       setPlaneSizeByCm(lengthCm);
     };
     inp.click();
   }
 
   useEffect(()=>{ if(svgRef.current) setPlaneSizeByCm(lengthCm); }, [lengthCm]);
+  useEffect(()=>{ if(svgRef.current) setPlaneSizeByCm(lengthCm); }, [dynamicPxPerCm]); // Re-scale when scene changes
   useEffect(()=>{ if(svgRef.current) processUV(svgRef.current, uvOn); }, [uvOn]);
-  useEffect(()=>{ toggleNeon(svgRef.current, localNeonOn, (neonIntensity ?? localNeon)); }, [localNeonOn, neonIntensity, localNeon, setName]);
-  useEffect(()=>{ // Zoom/Drag → Transform anpassen
+  useEffect(()=>{ toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon); }, [localNeonOn, neonIntensity, localNeon, setName]);
+  useEffect(()=>{ // Drag → Transform anpassen
     planeRef.current && (planeRef.current.style.transform =
-      `translate(-50%,-50%) translate(${(drag.dx/effZoom).toFixed(2)}px, ${(drag.dy/effZoom).toFixed(2)}px) scale(${effZoom})`);
-  }, [effZoom, drag.dx, drag.dy]);
+      `translate(-50%,-50%) translate(${drag.dx.toFixed(2)}px, ${drag.dy.toFixed(2)}px) scale(1)`);
+  }, [drag.dx, drag.dy]);
 
   const [open, setOpen] = useState(false);
 
@@ -301,7 +331,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       {/* Base */}
       <div style={{
         ...S.layer, zIndex:0,
-        filter:`brightness(${(bgBrightness ?? localBg).toString()})`,
+        filter:`brightness(${(bgBrightness ?? localBg)})`,
         backgroundImage:`url(${baseUrl})`
       }}/>
       {/* Möbel (oberhalb SVG) */}
@@ -377,20 +407,6 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 SVG laden…
               </button>
 
-            {sceneZoom===undefined && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Szene-Zoom</label>
-                <input 
-                  type="range" 
-                  min={0.30} 
-                  max={1.50} 
-                  step={0.01}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                  defaultValue={localZoom}
-                  onChange={(e)=> setLocalZoom(parseFloat(e.currentTarget.value))}
-                />
-              </div>
-            )}
             {bgBrightness===undefined && (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">BG-Helligkeit</label>
@@ -426,7 +442,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 <input
                   type="checkbox"
                   checked={localNeonOn}
-                  onChange={(e)=>{ const v=e.currentTarget.checked; setLocalNeonOn(v); toggleNeon(svgRef.current, v, (neonIntensity ?? localNeon)); }}
+                  onChange={(e)=>{ const v=e.currentTarget.checked; setLocalNeonOn(v); toggleNeon(svgRef.current, v, neonIntensity ?? localNeon); }}
                   className="sr-only"
                 />
                 <div className={`relative w-11 h-6 rounded-full transition-colors ${
