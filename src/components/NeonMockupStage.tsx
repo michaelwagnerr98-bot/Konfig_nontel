@@ -457,16 +457,37 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       } else {
         // Zurück zur normalen Ansicht: Alle Effekte neu anwenden
         if (svgRef.current) {
+          // Schritt 1: Acryl-Effekte wiederherstellen
           processAcrylic(svgRef.current);
-          // Neon-Effekte mit aktuellen Einstellungen wiederherstellen
+          
+          // Schritt 2: Neon komplett neu verarbeiten
           processNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
-          // Zusätzlich: Neon-Toggle explizit aufrufen für korrekte Wiederherstellung
-          setTimeout(() => {
-            if (svgRef.current && localNeonOn) {
-              toggleNeon(svgRef.current, true, neonIntensity ?? localNeon);
-            }
-          }, 50);
+          
+          // Schritt 3: UV-Druck wiederherstellen
           processUV(svgRef.current, uvOn);
+          
+          // Schritt 4: Mehrfache Neon-Wiederherstellung für Robustheit
+          setTimeout(() => {
+            if (svgRef.current) {
+              console.log('🔄 Erste Neon-Wiederherstellung:', localNeonOn, neonIntensity ?? localNeon);
+              toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
+            }
+          }, 100);
+          
+          setTimeout(() => {
+            if (svgRef.current) {
+              console.log('🔄 Zweite Neon-Wiederherstellung:', localNeonOn, neonIntensity ?? localNeon);
+              toggleNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
+            }
+          }, 300);
+          
+          setTimeout(() => {
+            if (svgRef.current) {
+              console.log('🔄 Finale Neon-Wiederherstellung:', localNeonOn, neonIntensity ?? localNeon);
+              // Komplett neu verarbeiten
+              processNeon(svgRef.current, localNeonOn, neonIntensity ?? localNeon);
+            }
+          }, 500);
         }
       }
       return newValue;
