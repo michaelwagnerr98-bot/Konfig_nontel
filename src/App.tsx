@@ -1,146 +1,278 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Zap, Settings, Calculator, ShoppingCart, Eye, EyeOff, X, Plus, Edit3, Palette, Ruler, Shield, Wrench, MapPin, Scissors, Info, Package, Home, Truck, CreditCard, FileText, Building, User, LogOut, Mail, Lock, UserPlus, CheckCircle, ArrowLeft } from 'lucide-react';
-import { ConfigurationState, NeonDesign, SignConfiguration } from './types/configurator';
-import { calculateProportionalHeight, calculateSingleSignPrice, calculateProportionalLedLength, validateConfiguration, calculateArea, calculateDistance, getShippingInfo } from './utils/calculations';
-import { getAvailableDesigns } from './data/mockDesigns';
-import { mondayService } from './services/mondayService';
 import CustomerHeader from './components/CustomerHeader';
 import MondayStatus from './components/MondayStatus';
-import NeonMockupStage from './components/NeonMockupStage';
-import ProductsPage from './components/ProductsPage';
+import ConfigurationPanel from './components/ConfigurationPanel';
+import DesignSelector from './components/DesignSelector';
+import PricingCalculator from './components/PricingCalculator';
+import CartCheckout from './components/CartCheckout';
+import ShippingSelector from './components/ShippingSelector';
 import LoginPage from './components/auth/LoginPage';
 import SignupPage from './components/auth/SignupPage';
+import ProductsPage from './components/ProductsPage';
 import SuccessPage from './components/SuccessPage';
-import AgbPage from './components/legal/AgbPage';
-import DatenschutzPage from './components/legal/DatenschutzPage';
-import ImpressumPage from './components/legal/ImpressumPage';
 import WiderrufsrechtPage from './components/legal/WiderrufsrechtPage';
+import DatenschutzPage from './components/legal/DatenschutzPage';
+import AgbPage from './components/legal/AgbPage';
 import ZahlungVersandPage from './components/legal/ZahlungVersandPage';
-import SVGPreview from './components/SVGPreview';
+import ImpressumPage from './components/legal/ImpressumPage';
+import { ConfigurationState, SignConfiguration } from './types/configurator';
+import { MOCK_DESIGNS } from './data/mockDesigns';
+import { calculateProportionalHeight, calculateSingleSignPrice, calculateProportionalLedLength } from './utils/calculations';
+import NeonMockupStage from './components/NeonMockupStage';
+import { ShoppingCart, X, ArrowLeft, ChevronLeft, ChevronRight, Settings, FileText, Ruler, Shield, Truck, Wrench, MapPin, Info, Scissors, Palette } from 'lucide-react';
+import { Edit3 } from 'lucide-react';
+import ShippingCalculationPage from './components/ShippingCalculationPage';
+import mondayService from './services/mondayService';
 
-// Import hooks from react-router-dom
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+// Conditional Supabase import
+let supabase: any = null;
+try {
+  const supabaseModule = await import('./lib/supabase');
+  supabase = supabaseModule.supabase;
+} catch (error) {
+  console.warn('Supabase not configured, running in demo mode');
+}
 
-const App: React.FC = () => {
+function App() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (supabase) {
+      // Get initial session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      });
+
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null);
+      });
+
+      return () => subscription.unsubscribe();
+    } else {
+      // Demo mode - no authentication
+      setLoading(false);
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<NeonConfigurator />} />
+        <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/products" />} />
+        <Route path="/signup" element={!user ? <SignupPage /> : <Navigate to="/products" />} />
         <Route path="/products" element={<ProductsPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
         <Route path="/success" element={<SuccessPage />} />
-        <Route path="/agb" element={<AgbPage />} />
-        <Route path="/datenschutz" element={<DatenschutzPage />} />
-        <Route path="/impressum" element={<ImpressumPage />} />
         <Route path="/widerrufsrecht" element={<WiderrufsrechtPage />} />
+        <Route path="/datenschutz" element={<DatenschutzPage />} />
+        <Route path="/agb" element={<AgbPage />} />
         <Route path="/zahlung-versand" element={<ZahlungVersandPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/impressum" element={<ImpressumPage />} />
+        <Route path="/" element={<NeonConfiguratorApp />} />
       </Routes>
     </Router>
   );
-};
+}
 
-const NeonConfigurator: React.FC = () => {
-  const navigate = useNavigate();
-  const [designs, setDesigns] = useState<NeonDesign[]>([]);
-  const [currentView, setCurrentView] = useState<'design' | 'cart'>('design');
-  const [showPostalCodeInput, setShowPostalCodeInput] = useState(false);
-  const [tempPostalCode, setTempPostalCode] = useState('');
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [isConfirmed, setIsConfirmed] = useState(false);
-  const [selectedBackground, setSelectedBackground] = useState('ab_100cm_50%');
-
+function NeonConfiguratorApp() {
+  const [neonOn, setNeonOn] = useState(true);
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [config, setConfig] = useState<ConfigurationState>({
-    selectedDesign: {
-      id: 'design-1',
-      name: 'Classic Business Logo',
-      originalWidth: 400,
-      originalHeight: 200,
-      elements: 5,
-      ledLength: 12,
-      mockupUrl: 'https://images.pexels.com/photos/1036936/pexels-photo-1036936.jpeg?auto=compress&cs=tinysrgb&w=800&h=400&fit=crop',
-      description: 'Klassisches Firmenlogo-Design mit klaren Linien'
-    },
-    customWidth: 100,
-    calculatedHeight: 50,
+    selectedDesign: MOCK_DESIGNS[0],
+    customWidth: 200, // 2m
+    calculatedHeight: 100, // Will be calculated
     isWaterproof: false,
-    isTwoPart: false,
     hasUvPrint: true,
     hasHangingSystem: false,
     includesInstallation: false,
-    expressProduction: false,
     customerPostalCode: '',
     selectedShipping: null,
+    // Initialize with empty signs array
     signs: [],
-    onConfigChange: undefined,
-    onShippingChange: undefined,
-    onSignToggle: undefined,
-    onRemoveSign: undefined,
   });
+  
+  const [availableDesigns, setAvailableDesigns] = useState(MOCK_DESIGNS);
+  const [isLoadingDesigns, setIsLoadingDesigns] = useState(true);
+  
+  // State für temporäre "Im Warenkorb" Animation
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  
+  // Mobile cart state
+  const [showMobileCart, setShowMobileCart] = useState(false);
+  const [currentStep, setCurrentStep] = useState<'design' | 'cart'>('design');
+  const [showShippingPage, setShowShippingPage] = useState(false);
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
+  }, []);
 
-  // Load designs on component mount
+  // Load designs from Monday.com on component mount
   useEffect(() => {
     const loadDesigns = async () => {
       try {
-        const availableDesigns = await getAvailableDesigns();
-        setDesigns(availableDesigns);
-        if (availableDesigns.length > 0) {
-          setConfig(prev => ({ ...prev, selectedDesign: availableDesigns[0] }));
+        await mondayService.fetchPrices();
+        const mondayDesigns = mondayService.getDesigns();
+        
+        if (mondayDesigns.length > 0) {
+          console.log('🎨 Monday.com Designs geladen:', mondayDesigns.length);
+          setAvailableDesigns(mondayDesigns);
+          // Set first Monday design as selected if available
+          if (mondayDesigns[0]) {
+            setConfig(prev => ({
+              ...prev,
+              selectedDesign: mondayDesigns[0]
+            }));
+          }
+        } else {
+          console.log('📦 Verwende Mock-Designs als Fallback');
+          setAvailableDesigns(MOCK_DESIGNS);
         }
       } catch (error) {
-        console.error('Failed to load designs:', error);
+        console.error('❌ Fehler beim Laden der Designs:', error);
+        setAvailableDesigns(MOCK_DESIGNS);
+      } finally {
+        setIsLoadingDesigns(false);
       }
     };
-    
+
     loadDesigns();
   }, []);
 
+  // Update height when design or width changes
+  useEffect(() => {
+    const newHeight = calculateProportionalHeight(
+      config.selectedDesign.originalWidth,
+      config.selectedDesign.originalHeight,
+      config.customWidth
+    );
+    setConfig(prev => ({ ...prev, calculatedHeight: newHeight }));
+  }, [config.selectedDesign, config.customWidth]);
+
   const handleConfigChange = (updates: Partial<ConfigurationState>) => {
-    setConfig(prev => ({ ...prev, ...updates }));
+    console.log('🔧 Config change:', updates);
+    
+    // Neon ausschalten bei Konfigurationsänderungen die das Design beeinflussen
+    if ((updates.customWidth !== undefined || updates.calculatedHeight !== undefined || 
+         updates.isWaterproof !== undefined || updates.isTwoPart !== undefined) && neonOn) {
+      setNeonOn(false);
+      setIsResizing(true);
+      
+      // Clear existing timeout
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+      
+      // Neon nach 600ms wieder einschalten
+      resizeTimeoutRef.current = setTimeout(() => {
+        setNeonOn(true);
+        setIsResizing(false);
+      }, 600);
+    }
+    
+    setConfig(prev => {
+      const newConfig = { ...prev, ...updates };
+      
+      // Reset shipping selection when installation is enabled
+      if (updates.includesInstallation === true) {
+        newConfig.selectedShipping = null;
+      }
+      
+      // Update existing signs with new configuration when relevant settings change
+      if (updates.isWaterproof !== undefined || updates.isTwoPart !== undefined || updates.hasUvPrint !== undefined || updates.hasHangingSystem !== undefined) {
+        const updatedSigns = newConfig.signs.map(sign => ({
+          ...sign,
+          isWaterproof: updates.isWaterproof !== undefined ? updates.isWaterproof : newConfig.isWaterproof,
+          isTwoPart: updates.isTwoPart !== undefined ? updates.isTwoPart : newConfig.isTwoPart,
+          hasUvPrint: updates.hasUvPrint !== undefined ? updates.hasUvPrint : newConfig.hasUvPrint,
+          hasHangingSystem: updates.hasHangingSystem !== undefined ? updates.hasHangingSystem : newConfig.hasHangingSystem,
+        }));
+        newConfig.signs = updatedSigns;
+      }
+      
+      // Also update signs when width changes (this affects the current design dimensions)
+      if (updates.customWidth !== undefined || updates.calculatedHeight !== undefined) {
+        const updatedSigns = newConfig.signs.map(sign => {
+          // Only update signs that match the current selected design
+          if (sign.design.id === newConfig.selectedDesign.id) {
+            return {
+              ...sign,
+              width: updates.customWidth !== undefined ? updates.customWidth : newConfig.customWidth,
+              height: updates.calculatedHeight !== undefined ? updates.calculatedHeight : newConfig.calculatedHeight,
+              // Also update hasUvPrint for the current design
+              hasUvPrint: updates.hasUvPrint !== undefined ? updates.hasUvPrint : newConfig.hasUvPrint,
+              hasHangingSystem: updates.hasHangingSystem !== undefined ? updates.hasHangingSystem : newConfig.hasHangingSystem,
+            };
+          }
+          return sign;
+        });
+        newConfig.signs = updatedSigns;
+      }
+      
+      console.log('🔧 New config after update:', newConfig);
+      return newConfig;
+    });
   };
 
-  const handleShippingChange = (shipping: any) => {
-    setConfig(prev => ({ ...prev, selectedShipping: shipping }));
-  };
-
-  const handleDesignChange = (design: NeonDesign) => {
+  const handleDesignChange = (design: typeof MOCK_DESIGNS[0]) => {
     const newHeight = calculateProportionalHeight(
       design.originalWidth,
       design.originalHeight,
-      config.customWidth
+      design.originalWidth
     );
-    
     setConfig(prev => ({
       ...prev,
       selectedDesign: design,
+      customWidth: design.originalWidth,
       calculatedHeight: newHeight,
     }));
   };
 
-  const handleToggleDesign = (design: NeonDesign, added: boolean) => {
-    if (added) {
-      const newSign: SignConfiguration = {
-        id: `sign-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        design: design,
-        width: config.customWidth,
-        height: config.calculatedHeight,
-        isEnabled: true,
-        isWaterproof: config.isWaterproof,
-        isTwoPart: config.isTwoPart,
-        hasUvPrint: config.hasUvPrint,
-        hasHangingSystem: config.hasHangingSystem,
-        expressProduction: config.expressProduction,
-      };
-      
-      setConfig(prev => ({
-        ...prev,
-        signs: [...prev.signs, newSign]
-      }));
-    }
+  const handleToggleDesign = (design: typeof MOCK_DESIGNS[0], added: boolean) => {
+    // Starte Animation
+    setIsAddingToCart(true);
+    
+    // Always add new sign (ignore 'added' parameter)
+    const newSign: SignConfiguration = {
+      id: `sign-${design.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Unique ID for duplicates
+      design: design,
+      width: config.customWidth,
+      height: calculateProportionalHeight(design.originalWidth, design.originalHeight, config.customWidth),
+      isEnabled: true,
+      isWaterproof: config.isWaterproof,
+      isTwoPart: config.isTwoPart,
+      hasUvPrint: config.hasUvPrint ?? true,
+      hasHangingSystem: config.hasHangingSystem ?? false,
+    };
+    console.log('➕ Adding new sign with hasUvPrint:', newSign.hasUvPrint);
+    setConfig(prev => ({
+      ...prev,
+      signs: [...prev.signs, newSign]
+    }));
+    
+    // Animation nach 1 Sekunde beenden
+    setTimeout(() => {
+      setIsAddingToCart(false);
+    }, 1000);
   };
-
   const handleSignToggle = (signId: string, enabled: boolean) => {
     setConfig(prev => ({
       ...prev,
@@ -157,1485 +289,769 @@ const NeonConfigurator: React.FC = () => {
     }));
   };
 
+  const handleShippingChange = (shipping: any) => {
+    setConfig(prev => ({ ...prev, selectedShipping: shipping }));
+  };
+
+  const handleDesignUpdate = (updatedDesign: typeof MOCK_DESIGNS[0]) => {
+    setConfig(prev => ({
+      ...prev,
+      selectedDesign: updatedDesign
+    }));
+  };
+
+  // Check if current design is already added
+  const currentDesignCount = config.signs.filter(sign => sign.design.id === config.selectedDesign.id).length;
+  const isCurrentDesignAdded = currentDesignCount > 0;
+  // Customer data (would come from URL params or API in real implementation)
+  const customerData = {
+    name: "Müller GmbH & Co. KG",
+    logo: "/Logo Long White.png",
+    orderToken: "neon-order-8f4e2d1a-b3c5-4d6e-7f8g-9h0i1j2k3l4m",
+  };
+  
+  // Calculate current design price for mobile cart
+  const currentDesignPrice = React.useMemo(() => {
+    console.log('📱 Mobile cart price calculation with hasUvPrint:', config.hasUvPrint, 'hasHangingSystem:', config.hasHangingSystem);
+    const basePrice = calculateSingleSignPrice(
+      config.selectedDesign,
+      config.customWidth,
+      config.calculatedHeight,
+      config.isWaterproof,
+      config.isTwoPart || false,
+      config.hasUvPrint,
+      config.hasHangingSystem || false,
+      config.expressProduction || false
+    );
+    
+    return basePrice;
+  }, [config.selectedDesign, config.customWidth, config.calculatedHeight, config.isWaterproof, config.isTwoPart, config.hasUvPrint, config.hasHangingSystem, config.expressProduction]);
+  
+  // Calculate total items in cart
+  const cartItemCount = config.signs.filter(s => s.isEnabled).length;
+
+  // Calculate effective max width based on height constraints
+  const maxWidthForHeight = React.useMemo(() => {
+    const maxHeight = 200; // Maximum allowed height in cm
+    return Math.floor((maxHeight * config.selectedDesign.originalWidth) / config.selectedDesign.originalHeight);
+  }, [config.selectedDesign.originalWidth, config.selectedDesign.originalHeight]);
+
+  const effectiveMaxWidth = React.useMemo(() => {
+    if (config.isTwoPart) {
+      return 1000; // 10m for two-part signs
+    }
+    return Math.min(300, maxWidthForHeight); // 3m or height-constrained width, whichever is smaller
+  }, [config.isTwoPart, maxWidthForHeight]);
+
   const handleWidthChange = (newWidth: number) => {
+    // Neon ausschalten während Größenänderung
+    if (neonOn) {
+      setNeonOn(false);
+      setIsResizing(true);
+    }
+    
+    // Clear existing timeout
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
+    }
+    
     const newHeight = calculateProportionalHeight(
       config.selectedDesign.originalWidth,
       config.selectedDesign.originalHeight,
       newWidth
     );
     
-    if (!config.isTwoPart && newHeight > 200) {
+    // Check if height exceeds 200cm and isTwoPart is not enabled
+    if (newHeight > 200 && !config.isTwoPart) {
+      // Don't update if it would exceed height limit
       return;
     }
     
-    setConfig(prev => ({
-      ...prev,
+    handleConfigChange({ 
       customWidth: newWidth,
-      calculatedHeight: newHeight,
-    }));
-  };
-
-  const handleTwoPartChange = (isTwoPart: boolean) => {
-    if (!isTwoPart && config.customWidth > 300) {
-      const newHeight = calculateProportionalHeight(
-        config.selectedDesign.originalWidth,
-        config.selectedDesign.originalHeight,
-        300
-      );
-      setConfig(prev => ({
-        ...prev,
-        isTwoPart,
-        customWidth: 300,
-        calculatedHeight: newHeight,
-      }));
-    } else {
-      setConfig(prev => ({ ...prev, isTwoPart }));
-    }
-  };
-
-  const handlePostalCodeSubmit = () => {
-    if (tempPostalCode && /^\d{5}$/.test(tempPostalCode)) {
-      handleConfigChange({ customerPostalCode: tempPostalCode });
-      setTempPostalCode('');
-      setShowPostalCodeInput(false);
-    }
-  };
-
-  const handleStripeCheckout = async () => {
-    setIsProcessingPayment(true);
+      calculatedHeight: newHeight
+    });
     
-    try {
-      let supabase: any = null;
-      try {
-        const supabaseModule = await import('./lib/supabase');
-        supabase = supabaseModule.supabase;
-      } catch (error) {
-        console.warn('Supabase not available, using demo mode');
-      }
-      
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      
-      if (supabase && supabaseUrl && supabaseUrl !== '') {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session) {
-          alert('Bitte melden Sie sich zuerst an');
-          setIsProcessingPayment(false);
-          return;
-        }
-
-        const response = await fetch(`${supabaseUrl}/functions/v1/stripe-checkout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            price_id: 'price_1QeGJd2LCcXvM9me52rlA2op',
-            success_url: `${window.location.origin}/success`,
-            cancel_url: `${window.location.origin}/`,
-            mode: 'payment',
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        window.location.href = data.url;
-      } else {
-        const confirmed = confirm(
-          `🛒 DEMO CHECKOUT\n\n` +
-          `Dies ist eine Demo. Möchten Sie zur Erfolgsseite weitergeleitet werden?`
-        );
-        
-        if (confirmed) {
-          window.location.href = '/success?demo=true';
-        }
-      }
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      alert(`Checkout-Fehler: ${error.message || 'Unbekannter Fehler'}`);
-    } finally {
-      setIsProcessingPayment(false);
-    }
+    // Neon nach 800ms wieder einschalten
+    resizeTimeoutRef.current = setTimeout(() => {
+      setNeonOn(true);
+      setIsResizing(false);
+    }, 800);
   };
 
-  // Calculate current design price
-  const currentDesignPrice = calculateSingleSignPrice(
-    config.selectedDesign,
-    config.customWidth,
-    config.calculatedHeight,
-    config.isWaterproof,
-    config.isTwoPart || false,
-    config.hasUvPrint || true,
-    config.hasHangingSystem || false,
-    config.expressProduction || false
-  );
+  const handleGoToCart = () => {
+    setCurrentStep('cart');
+  };
 
-  // Calculate individual sign prices
-  const signPrices = config.signs?.map(sign => ({
-    ...sign,
-    price: calculateSingleSignPrice(
-      sign.design,
-      sign.width,
-      sign.height,
-      sign.isWaterproof,
-      sign.isTwoPart,
-      sign.hasUvPrint || true,
-      sign.hasHangingSystem || false,
-      sign.expressProduction || false
-    )
-  })) || [];
+  const handleBackToDesign = () => {
+    setCurrentStep('design');
+  };
 
-  // Calculate total
-  const isCurrentDesignInList = config.signs?.some(sign => sign.design.id === config.selectedDesign.id) || false;
-  const enabledSignsTotal = signPrices
-    .filter(sign => sign.isEnabled)
-    .reduce((total, sign) => total + sign.price, 0) + 
-    (isCurrentDesignInList ? 0 : currentDesignPrice);
+  const handleShowShippingPage = () => {
+    setShowShippingPage(true);
+  };
 
-  // Get largest dimensions for shipping calculation
-  const longestSide = Math.max(config.customWidth, config.calculatedHeight);
-  
-  // Get distance info if postal code is available
-  const distanceInfo = config.customerPostalCode 
-    ? calculateDistance('67433', config.customerPostalCode)
-    : { distance: 0, cityName: '' };
-
-  // Get shipping info based on longest side and distance
-  const shippingInfo = getShippingInfo(longestSide, distanceInfo.distance || undefined);
-  
-  // Calculate shipping cost (0 if pickup is selected OR installation is included)
-  const actualShippingCost = (config.selectedShipping?.type === 'pickup' || config.includesInstallation) ? 0 : shippingInfo.cost;
-  
-  // Calculate additional costs (installation + shipping)
-  let installation = 0;
-  if (config.includesInstallation && config.customerPostalCode && /^\d{5}$/.test(config.customerPostalCode)) {
-    const areaM2 = calculateArea(config.customWidth, config.calculatedHeight);
-    installation = mondayService.calculateInstallationCost(areaM2, config.customerPostalCode);
-  }
-  
-  const expressProductionCost = 0;
-  const additionalCosts = installation + actualShippingCost + expressProductionCost;
-  const subtotal = enabledSignsTotal + additionalCosts;
-  const tax = subtotal * 0.19;
-  const gesamtpreis = subtotal + tax;
-
-  const errors = validateConfiguration(config);
-  const maxWidthForHeight = Math.floor((200 * config.selectedDesign.originalWidth) / config.selectedDesign.originalHeight);
-  const effectiveMaxWidth = config.isTwoPart ? 1000 : Math.min(300, maxWidthForHeight);
-
-  const currentDesignCount = config.signs?.filter((sign: any) => sign.design.id === config.selectedDesign.id).length || 0;
-  const isCurrentDesignAdded = currentDesignCount > 0;
-
-  if (currentView === 'cart') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-        <CustomerHeader 
-          customerName="Demo Kunde"
-          orderToken="demo-token"
-        />
-        
-        <div className="pt-12 md:pt-16">
-          <div className="max-w-6xl mx-auto px-4 py-6">
-            {/* Header */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-blue-600 rounded-lg p-2">
-                    <ShoppingCart className="h-6 w-6 text-white" />
-                  </div>
-                  <h1 className="text-2xl font-bold text-gray-800">Warenkorb & Versand</h1>
-                  <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {signPrices.filter(s => s.isEnabled).length} Artikel
-                  </div>
-                </div>
-                
-                <button
-                  onClick={() => setCurrentView('design')}
-                  className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
-                >
-                  <Edit3 className="h-4 w-4" />
-                  <span>Design anpassen</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Left Column - Cart Items */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">Ihre Neon-Schilder</h2>
-                  
-                  {signPrices.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-500 mb-2">Warenkorb ist leer</h3>
-                      <p className="text-gray-400">Fügen Sie Designs zu Ihrem Warenkorb hinzu</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {signPrices.map((sign, index) => (
-                        <div
-                          key={sign.id}
-                          className={`border rounded-lg p-4 transition-all duration-300 ${
-                            sign.isEnabled
-                              ? 'border-green-200 bg-green-50'
-                              : 'border-gray-200 bg-gray-50 opacity-75'
-                          }`}
-                        >
-                          <div className="flex items-start space-x-4">
-                            <SVGPreview 
-                              design={sign.design}
-                              width={sign.width}
-                              height={sign.height}
-                              className="w-20 h-20"
-                            />
-                            
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between mb-2">
-                                <div>
-                                  <h3 className="font-semibold text-gray-800">{sign.design.name}</h3>
-                                  <p className="text-sm text-gray-600">
-                                    Design {index + 1} • {sign.width}×{sign.height}cm
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-xl font-bold text-gray-800">€{sign.price.toFixed(2)}</div>
-                                  <div className="text-sm text-gray-500">pro Stück</div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex flex-wrap items-center gap-2 mb-3">
-                                {sign.isWaterproof && (
-                                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                                    Wasserdicht (IP65)
-                                  </span>
-                                )}
-                                {sign.isTwoPart && (
-                                  <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
-                                    Mehrteilig
-                                  </span>
-                                )}
-                                {sign.hasUvPrint && (
-                                  <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs font-medium">
-                                    UV-Druck
-                                  </span>
-                                )}
-                              </div>
-                              
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-2">
-                                  <button
-                                    onClick={() => handleSignToggle(sign.id, !sign.isEnabled)}
-                                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-300 ${
-                                      sign.isEnabled
-                                        ? 'bg-green-500 text-white hover:bg-green-600'
-                                        : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                                    }`}
-                                  >
-                                    {sign.isEnabled ? (
-                                      <>
-                                        <Eye className="h-4 w-4" />
-                                        <span>Aktiv</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <EyeOff className="h-4 w-4" />
-                                        <span>Inaktiv</span>
-                                      </>
-                                    )}
-                                  </button>
-                                </div>
-                                
-                                <button
-                                  onClick={() => handleRemoveSign(sign.id)}
-                                  className="flex items-center space-x-1 px-3 py-1.5 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-all duration-300 text-sm font-medium"
-                                >
-                                  <X className="h-4 w-4" />
-                                  <span>Entfernen</span>
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Shipping Options */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">Versandoptionen</h2>
-                  
-                  <div className={`flex items-center space-x-3 p-4 border-2 rounded-lg transition-all duration-300 cursor-pointer mb-4 ${
-                    config.includesInstallation
-                      ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-50'
-                      : config.selectedShipping && config.selectedShipping.type === 'pickup'
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                  }`}
-                  onClick={() => {
-                    if (config.includesInstallation) return;
-                    
-                    if (config.selectedShipping && config.selectedShipping.type === 'pickup') {
-                      handleShippingChange(null);
-                    } else {
-                      handleShippingChange({
-                        type: 'pickup',
-                        name: 'Selbstabholung',
-                        price: 0,
-                        description: 'Kostenlose Abholung in 67433 Neustadt'
-                      });
-                    }
-                  }}
-                  >
-                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                      config.includesInstallation
-                        ? 'border-gray-300 bg-gray-200'
-                        : config.selectedShipping && config.selectedShipping.type === 'pickup'
-                        ? 'border-green-600 bg-green-600'
-                        : 'border-gray-400 bg-white'
-                    }`}>
-                      {!config.includesInstallation && 
-                       (config.selectedShipping && config.selectedShipping.type === 'pickup') && (
-                        <div className="w-2 h-2 rounded-full bg-white"></div>
-                      )}
-                    </div>
-                    
-                    <div className={`p-2 rounded-lg ${
-                      config.includesInstallation
-                        ? 'bg-gray-200 text-gray-400'
-                        : config.selectedShipping && config.selectedShipping.type === 'pickup'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      <Home className="h-5 w-5" />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-gray-800">Selbstabholung (Empfohlen)</h4>
-                        <span className="font-bold text-green-600">Kostenlos</span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">Kostenlose Abholung in 67433 Neustadt</p>
-                    </div>
-                  </div>
-
-                  {longestSide >= 240 && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <Truck className="h-5 w-5 text-blue-600" />
-                        <h3 className="font-semibold text-blue-800">Versand verfügbar</h3>
-                      </div>
-                      
-                      {shippingInfo.requiresPostalCode && !config.customerPostalCode ? (
-                        <>
-                          <p className="text-blue-700 text-sm mb-3">
-                            Längste Seite: {longestSide}cm → Postleitzahl eingeben für Kostenberechnung
-                          </p>
-                          <button
-                            onClick={() => setShowPostalCodeInput(true)}
-                            className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                          >
-                            Postleitzahl eingeben
-                          </button>
-                        </>
-                      ) : (
-                        <div className="text-sm text-blue-700">
-                          <p className="mb-1">{shippingInfo.method}: €{shippingInfo.cost}</p>
-                          <p>Längste Seite: {longestSide}cm → {shippingInfo.description}</p>
-                          {config.customerPostalCode && (
-                            <p className="mt-2 font-medium">
-                              Lieferung nach {distanceInfo.cityName} ({config.customerPostalCode}) - {distanceInfo.distance} km
-                            </p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Column - Summary & Checkout */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">Bestellübersicht</h2>
-                  
-                  <div className="space-y-3 mb-6">
-                    <div className="flex justify-between text-gray-700">
-                      <span>Schilder ({signPrices.filter(s => s.isEnabled).length}):</span>
-                      <span className="font-semibold">€{enabledSignsTotal.toFixed(2)}</span>
-                    </div>
-                    
-                    {additionalCosts > 0 && (
-                      <div className="flex justify-between text-gray-700">
-                        <span>Zusatzkosten:</span>
-                        <span className="font-semibold">€{additionalCosts.toFixed(2)}</span>
-                      </div>
-                    )}
-                    
-                    <div className="flex justify-between text-gray-700 border-t pt-3">
-                      <span>Zwischensumme:</span>
-                      <span className="font-semibold">€{subtotal.toFixed(2)}</span>
-                    </div>
-                    
-                    <div className="flex justify-between text-gray-700">
-                      <span>MwSt. (19%):</span>
-                      <span className="font-semibold">€{tax.toFixed(2)}</span>
-                    </div>
-                    
-                    <div className="flex justify-between text-xl font-bold text-gray-800 border-t pt-3">
-                      <span>Gesamtpreis:</span>
-                      <span className="text-green-600">€{gesamtpreis.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                      <h4 className="font-semibold text-gray-800 mb-3">Checkbox-Bestätigung im Bestellprozess</h4>
-                      <label className="flex items-start space-x-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={isConfirmed}
-                          onChange={(e) => setIsConfirmed(e.target.checked)}
-                          className="w-5 h-5 text-green-600 focus:ring-green-500 rounded mt-0.5 flex-shrink-0"
-                        />
-                        <span className="text-sm text-gray-800 leading-relaxed">
-                          <strong>☑ Ich habe das Mock-up geprüft und bestätige, dass es meinen Vorgaben entspricht.
-                          Nach meiner Bestellung sind keine Änderungen oder ein Widerruf möglich.</strong>
-                        </span>
-                      </label>
-                      <p className="text-xs text-gray-600 mt-2 ml-8">
-                        Ohne diese Bestätigung ist eine Auftragserteilung nicht möglich.
-                      </p>
-                    </div>
-                    
-                    <button 
-                      onClick={handleStripeCheckout}
-                      disabled={isProcessingPayment || !isConfirmed}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    >
-                      <CreditCard className="h-5 w-5" />
-                      <span>
-                        {isProcessingPayment ? 'Wird verarbeitet...' : 
-                         !isConfirmed ? 'Bestätigung erforderlich' :
-                         `Jetzt bezahlen - €${gesamtpreis.toFixed(2)}`}
-                      </span>
-                    </button>
-                    
-                    <button 
-                      disabled={!isConfirmed}
-                      className="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 rounded-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <FileText className="h-5 w-5" />
-                      <span>{!isConfirmed ? 'Bestätigung erforderlich' : 'Per Rechnung bestellen'}</span>
-                    </button>
-                  </div>
-
-                  <div className="mt-6 bg-gray-50 rounded-lg p-3 border">
-                    <div className="flex items-center justify-center space-x-2 mb-2">
-                      <span className="text-xs text-gray-600">Sichere Zahlung:</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-2 flex-wrap gap-1">
-                      <div className="bg-white rounded px-2 py-1 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 bg-blue-600 rounded-sm flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">V</span>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded px-2 py-1 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 flex items-center justify-center">
-                          <div className="flex space-x-0.5">
-                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
-                            <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full -ml-0.5"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded px-2 py-1 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 flex items-center justify-center">
-                          <div className="flex space-x-0.5">
-                            <div className="w-1 h-2 bg-blue-600 rounded-full"></div>
-                            <div className="w-1 h-2 bg-blue-400 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded px-2 py-1 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 bg-green-600 rounded-sm flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">€</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-gray-500 text-center mt-4">
-                    Powered by Stripe • 14 Tage Widerrufsrecht • Käuferschutz
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Postal Code Input Modal */}
-            {showPostalCodeInput && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <MapPin className="h-5 w-5 text-blue-600" />
-                    <h3 className="text-lg font-semibold text-gray-800">Postleitzahl eingeben</h3>
-                  </div>
-                  
-                  <p className="text-sm text-gray-600 mb-4">
-                    Geben Sie Ihre Postleitzahl ein, um die Versandkosten zu berechnen.
-                  </p>
-                  
-                  <input
-                    type="text"
-                    placeholder="z.B. 10115"
-                    value={tempPostalCode}
-                    onChange={(e) => setTempPostalCode(e.target.value)}
-                    className="w-full px-3 py-3 border border-gray-300 rounded-lg mb-4"
-                    maxLength={5}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handlePostalCodeSubmit();
-                      }
-                    }}
-                  />
-                  
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={handlePostalCodeSubmit}
-                      disabled={!tempPostalCode || !/^\d{5}$/.test(tempPostalCode)}
-                      className="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Berechnen
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowPostalCodeInput(false);
-                        setTempPostalCode('');
-                      }}
-                      className="flex-1 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                    >
-                      Abbrechen
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleCloseShippingPage = () => {
+    setShowShippingPage(false);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-      <CustomerHeader 
-        customerName="Demo Kunde"
-        orderToken="demo-token"
-      />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 overflow-x-hidden relative">
+      {!showShippingPage && (
+        <CustomerHeader
+          customerName={customerData.name}
+          customerLogo={customerData.logo}
+          orderToken={customerData.orderToken}
+        />
+      )}
       
-      <div className="pt-12 md:pt-16">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid lg:grid-cols-12 gap-6">
-            {/* Left Column - Design & Configuration */}
-            <div className="lg:col-span-8 space-y-6">
-              {/* Design Selector */}
-              <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-8">
-                <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                  <div className="bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg p-2">
-                    <Palette className="h-5 md:h-6 w-5 md:w-6 text-white" />
-                  </div>
-                  <h2 className="text-lg md:text-2xl font-bold text-gray-800">Design auswählen</h2>
-                </div>
+      {/* Shipping Calculation Page */}
+      {showShippingPage && (
+        <ShippingCalculationPage
+          config={config}
+          onConfigChange={handleConfigChange}
+          onClose={handleCloseShippingPage}
+          onSignToggle={handleSignToggle}
+          onRemoveSign={handleRemoveSign}
+        />
+      )}
+      
+      {/* Main Content - Hidden when shipping page is open */}
+      {!showShippingPage && (
+      <>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-20 lg:pb-12">
+        {/* Step Navigation */}
+        {currentStep === 'cart' && (
+          <div className="mb-6 pt-20">
+            <button
+              onClick={handleBackToDesign}
+              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 font-medium"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Zurück zur Konfiguration</span>
+            </button>
+          </div>
+        )}
+        
+        {/* Desktop Title - Hidden on Mobile and in Cart */}
 
-                {/* Design Display */}
-                <div className="relative lg:block">
-                  <div className={`bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-xl p-4 md:p-6 flex items-center justify-center min-h-[350px] lg:min-h-[300px] overflow-hidden transition-all duration-300 relative border-4 border-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 shadow-2xl ${
-                    !isCurrentDesignAdded ? 'opacity-50 grayscale' : ''
-                  } lg:rounded-b-none before:absolute before:inset-0 before:rounded-xl before:bg-gradient-to-r before:from-blue-500/20 before:via-purple-500/20 before:to-pink-500/20 before:blur-sm before:-z-10`}>
-                    
-                    <div className="absolute top-2 left-2 w-6 h-6 border-l-2 border-t-2 border-blue-400/60 rounded-tl-lg"></div>
-                    <div className="absolute top-2 right-2 w-6 h-6 border-r-2 border-t-2 border-purple-400/60 rounded-tr-lg"></div>
-                    <div className="absolute bottom-2 left-2 w-6 h-6 border-l-2 border-b-2 border-pink-400/60 rounded-bl-lg"></div>
-                    <div className="absolute bottom-2 right-2 w-6 h-6 border-r-2 border-b-2 border-blue-400/60 rounded-br-lg"></div>
-                    
-                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-pulse"></div>
-                    
-                    <img
-                      src={config.selectedDesign.mockupUrl}
-                      alt={config.selectedDesign.name}
-                      className="max-w-full max-h-full object-contain rounded-lg shadow-2xl lg:shadow-2xl relative z-10 border border-white/10"
-                      style={{
-                        filter: 'drop-shadow(0 0 30px rgba(236, 72, 153, 0.7)) drop-shadow(0 0 60px rgba(59, 130, 246, 0.4))',
-                      }}
-                    />
-                    
-                    {/* Navigation Arrows */}
-                    <button
-                      onClick={() => {
-                        const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
-                        const prevIndex = currentIndex > 0 ? currentIndex - 1 : designs.length - 1;
-                        handleDesignChange(designs[prevIndex]);
-                      }}
-                      className="lg:hidden absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
-                    >
-                      <ArrowLeft className="h-6 w-6 text-gray-700" />
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
-                        const nextIndex = currentIndex < designs.length - 1 ? currentIndex + 1 : 0;
-                        handleDesignChange(designs[nextIndex]);
-                      }}
-                      className="lg:hidden absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110"
-                    >
-                      <ArrowLeft className="h-6 w-6 text-gray-700 transform rotate-180" />
-                    </button>
-                    
-                    {/* Design Indicators */}
-                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 lg:space-x-1.5">
-                      {designs.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleDesignChange(designs[index])}
-                          className={`w-4 h-4 lg:w-2.5 lg:h-2.5 rounded-full transition-all duration-300 border border-white/30 ${
-                            index === designs.findIndex(d => d.id === config.selectedDesign.id)
-                              ? 'bg-white shadow-lg shadow-white/50 scale-110'
-                              : 'bg-white/20 hover:bg-white/40 backdrop-blur-sm'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {/* UV-Druck Toggle */}
-                  <div className="mt-3 mb-3">
-                    <button
-                      onClick={() => handleConfigChange({ hasUvPrint: !config.hasUvPrint })}
-                      className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 border ${
-                        config.hasUvPrint
-                          ? 'bg-green-600 text-white border-green-500 shadow-lg hover:bg-green-700 active:scale-95'
-                          : 'bg-red-500 text-white border-red-400 shadow-md hover:bg-red-600 active:scale-95'
-                      }`}
-                      title="UV-Druck Zusatzoption ein/ausschalten"
-                    >
-                      {config.hasUvPrint ? '✅ UV-Druck AKTIV' : '❌ UV-Druck DEAKTIVIERT'}
-                    </button>
-                  </div>
-                  
-                  {/* Navigation Arrows for Desktop */}
-                  <button
-                    onClick={() => {
-                      const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
-                      const prevIndex = currentIndex > 0 ? currentIndex - 1 : designs.length - 1;
-                      handleDesignChange(designs[prevIndex]);
-                    }}
-                    className="hidden lg:block absolute -left-3 lg:-left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 lg:p-2 shadow-lg transition-all duration-300 hover:scale-110"
-                  >
-                    <ArrowLeft className="h-5 lg:h-4 w-5 lg:w-4 text-gray-700" />
-                  </button>
-                  
-                  <button
-                    onClick={() => {
-                      const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
-                      const nextIndex = currentIndex < designs.length - 1 ? currentIndex + 1 : 0;
-                      handleDesignChange(designs[nextIndex]);
-                    }}
-                    className="hidden lg:block absolute -right-3 lg:-right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 lg:p-2 shadow-lg transition-all duration-300 hover:scale-110"
-                  >
-                    <ArrowLeft className="h-5 lg:h-4 w-5 lg:w-4 text-gray-700 transform rotate-180" />
-                  </button>
-                </div>
-
-                {/* Design Info */}
-                <div className="bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 lg:rounded-t-none rounded-b-xl px-4 py-3 lg:px-3 lg:py-2 border-2 border-gradient-to-r from-blue-500/40 via-purple-500/40 to-pink-500/40 lg:border-t-0 mb-6 lg:mb-6 shadow-lg relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5"></div>
-                  
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold text-white truncate pr-2 relative z-10">{config.selectedDesign.name}</h3>
-                    <span className="text-xs font-bold text-gray-300 bg-gradient-to-r from-gray-700 to-gray-600 px-2 py-1 rounded-full flex-shrink-0 border border-gray-500/30 relative z-10">
-                      #{designs.findIndex(d => d.id === config.selectedDesign.id) + 1}
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 lg:flex lg:items-center lg:justify-between gap-2 lg:gap-0 mt-2 text-xs relative z-10">
-                    <div className="text-center">
-                      <div className="text-gray-400 text-xs">Breite</div>
-                      <div className="font-bold text-blue-300 bg-blue-500/20 px-2 py-0.5 rounded">{config.selectedDesign.originalWidth}cm</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-gray-400 text-xs">Höhe</div>
-                      <div className="font-bold text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded">{config.selectedDesign.originalHeight}cm</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-gray-400 text-xs">Elemente</div>
-                      <div className="font-bold text-green-300 bg-green-500/20 px-2 py-0.5 rounded">{config.selectedDesign.elements}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-gray-400 text-xs">LED</div>
-                      <div className="font-bold text-pink-300 bg-pink-500/20 px-2 py-0.5 rounded">
-                        {config.selectedDesign.ledLength}m
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Add to Cart Section */}
-                <div className="mb-3 lg:mb-4 mt-3 lg:mt-4">
-                  <div className="space-y-3">
-                    <button
-                      onClick={() => handleToggleDesign(config.selectedDesign, true)}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-4 rounded-lg hover:from-green-600 hover:to-emerald-700 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3"
-                    >
-                      <Plus className="h-5 w-5" />
-                      <span>{currentDesignCount > 0 ? 'Weitere hinzufügen' : 'Hinzufügen'}</span>
-                      <div className="bg-white/20 rounded-full px-2 py-1 text-sm font-bold">
-                        €{currentDesignPrice.toFixed(2)}
-                      </div>
-                    </button>
-                    
-                    {currentDesignCount > 0 && (
-                      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-2">
-                            <div className="bg-green-500 rounded-full p-1">
-                              <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </div>
-                            <span className="text-blue-800 font-semibold">
-                              {currentDesignCount}x im Warenkorb
-                            </span>
-                          </div>
-                        </div>
-                        <div className="text-sm text-blue-700 mb-1">
-                          LED-Schild ({config.customWidth}×{config.calculatedHeight}cm)
-                          {config.isWaterproof && ' • Wasserdicht'}
-                          {config.isTwoPart && ' • Mehrteilig'}
-                          {config.hasUvPrint && ' • UV-Druck'}
-                        </div>
-                        <div className="text-lg font-bold text-blue-800">
-                          €{currentDesignPrice.toFixed(2)} pro Stück
-                        </div>
-                        <div className="text-sm text-green-700 font-medium mt-1">
-                          Gesamt: €{(currentDesignPrice * currentDesignCount).toFixed(2)}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Configuration Panel */}
-              <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6 space-y-4 md:space-y-6">
-                <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-2">
-                    <Ruler className="h-5 md:h-6 w-5 md:w-6 text-white" />
-                  </div>
-                  <h2 className="text-lg md:text-xl font-bold text-gray-800">Konfiguration</h2>
-                </div>
-
-                {/* Size Configuration */}
-                <div className="space-y-3 md:space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                    <div>
-                      <label className="block text-sm md:text-sm font-semibold text-gray-700 mb-2">
-                        Breite
-                      </label>
-                      <div className="flex items-center space-x-2 mb-2">
-                        <input
-                          type="number"
-                          min="20"
-                          max={effectiveMaxWidth}
-                          value={config.customWidth}
-                          onChange={(e) => handleWidthChange(Number(e.target.value))}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center font-medium"
-                        />
-                        <span className="text-gray-600 text-sm font-medium">cm</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="20"
-                        max={effectiveMaxWidth}
-                        value={config.customWidth}
-                        onChange={(e) => handleWidthChange(Number(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                      />
-                      <div className="flex justify-between text-xs text-gray-500 mt-2">
-                        <span>20cm</span>
-                        <span>{config.isTwoPart ? '10m' : '3m'}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm md:text-sm font-semibold text-gray-700 mb-2">
-                        Höhe
-                      </label>
-                      <div className="bg-gray-100 px-3 py-3 md:py-2 rounded-lg text-center mb-2">
-                        <span className="text-lg md:text-lg font-bold text-gray-800">{config.calculatedHeight} cm</span>
-                      </div>
-                      <div className="text-xs text-gray-500 text-center mb-1">
-                        Automatisch berechnet
-                      </div>
-                      <div className="text-xs text-gray-500 text-center">
-                        Max: 200cm
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Two-Part Sign Option */}
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 md:p-2">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={config.isTwoPart || false}
-                        onChange={(e) => handleTwoPartChange(e.target.checked)}
-                        className="w-5 h-5 text-orange-600 focus:ring-orange-500 rounded"
-                      />
-                      <Scissors className="h-4 md:h-3 w-4 md:w-3 text-gray-500 flex-shrink-0" />
-                      <div className="flex items-center space-x-1">
-                        <span className="text-sm md:text-xs text-gray-600">
-                          Mehrteilig (>300cm, +15%)
-                        </span>
-                        <div className="relative group">
-                          <Info className="h-4 md:h-3 w-4 md:w-3 text-gray-400 hover:text-blue-500 cursor-help transition-colors flex-shrink-0" />
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 hidden md:block">
-                            Das Schild wird aus mehreren Teilen gefertigt und muss vor Ort zusammengesetzt
-                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Technical Specifications */}
-                <div className="border-t pt-4 md:pt-6">
-                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 md:p-3 border border-blue-100">
-                    <h3 className="text-xs md:text-xs font-bold text-gray-700 mb-3 md:mb-2 flex items-center">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                      Technische Daten
-                    </h3>
-                    <div className="grid grid-cols-3 gap-2 md:gap-3">
-                      <div className="text-center">
-                        <div className="text-base md:text-lg font-bold text-blue-600">{config.selectedDesign.elements}</div>
-                        <div className="text-xs text-gray-600">Elemente</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-base md:text-lg font-bold text-purple-600">
-                          {calculateProportionalLedLength(
-                            config.selectedDesign.originalWidth,
-                            config.selectedDesign.originalHeight,
-                            config.selectedDesign.ledLength,
-                            config.customWidth,
-                            config.calculatedHeight
-                          )}m
-                        </div>
-                        <div className="text-xs text-gray-600">LED-Länge</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-base md:text-lg font-bold text-green-600">
-                          {Math.round(calculateProportionalLedLength(
-                            config.selectedDesign.originalWidth,
-                            config.selectedDesign.originalHeight,
-                            config.selectedDesign.ledLength,
-                            config.customWidth,
-                            config.calculatedHeight
-                          ) * 9 * 1.25)}W
-                        </div>
-                        <div className="text-xs text-gray-600">Verbrauch</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Options */}
-                <div className="border-t pt-4 md:pt-6">
-                  <h3 className="text-sm md:text-sm font-semibold text-gray-800 mb-3">Zusatzoptionen</h3>
-                  <div className="space-y-3 md:space-y-4">
-                    <label className="flex items-start space-x-3 cursor-pointer p-2 md:p-0 hover:bg-gray-50 md:hover:bg-transparent rounded-lg md:rounded-none transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={config.isWaterproof}
-                        onChange={(e) => handleConfigChange({ isWaterproof: e.target.checked })}
-                        className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded mt-0.5 flex-shrink-0"
-                      />
-                      <div className="flex items-center space-x-2">
-                        <Shield className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                        <div>
-                          <span className="text-gray-700 font-medium text-sm md:text-base">Wasserdicht (IP65)</span>
-                          <div className="text-sm text-gray-500">+25% Aufpreis</div>
-                        </div>
-                      </div>
-                    </label>
-
-                    <div className="flex items-start space-x-3 p-2 md:p-0 rounded-lg">
-                      <div className="w-5 h-5 flex items-center justify-center mt-0.5 flex-shrink-0">
-                        <div className="w-3 h-3 bg-gray-300 rounded border"></div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <div className="text-red-600 text-lg flex-shrink-0">🔥</div>
-                        <div className="flex-1">
-                          <span className="text-gray-700 font-medium text-sm md:text-base">Super EXPRESS Produktion</span>
-                          <div className="text-sm text-gray-500">1 Tag • Muss telefonisch abgeklärt werden</div>
-                          <div className="text-xs text-blue-600 font-medium mt-1">
-                            Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
-                          </div>
-                        </div>
-                        <div className="relative group">
-                          <Info className="h-4 w-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors flex-shrink-0" />
-                          <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 hidden md:block">
-                            Dafür werden zusätzliche Kosten berechnet.<br/>Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
-                            <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <label className="flex items-start space-x-3 cursor-pointer p-2 md:p-0 hover:bg-gray-50 md:hover:bg-transparent rounded-lg md:rounded-none transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={config.includesInstallation}
-                        onChange={(e) => handleConfigChange({ includesInstallation: e.target.checked })}
-                        className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded mt-0.5 flex-shrink-0"
-                      />
-                      <div className="flex items-center space-x-2">
-                        <Wrench className="h-5 w-5 text-green-600 flex-shrink-0" />
-                        <div>
-                          <span className="text-gray-700 font-medium text-sm md:text-base">Montage-Service</span>
-                          <div className="text-sm text-gray-500">PLZ eingeben für Kostenberechnung</div>
-                        </div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Postal Code for Installation */}
-                {config.includesInstallation && (
-                  <div className="border-t pt-4 md:pt-6">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <MapPin className="h-5 w-5 text-blue-600" />
-                      <label className="text-sm md:text-sm font-semibold text-gray-800">
-                        Ihre Postleitzahl
-                      </label>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="z.B. 10115"
-                      value={config.customerPostalCode}
-                      onChange={(e) => handleConfigChange({ customerPostalCode: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      maxLength={5}
-                    />
-                    <p className="text-sm text-gray-500 mt-2">
-                      Benötigt für die Berechnung der Anfahrtskosten
-                    </p>
-                  </div>
-                )}
-
-                {/* Validation Errors */}
-                {errors.length > 0 && (
-                  <div className="border-t pt-4 md:pt-6">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <h4 className="text-red-800 font-semibold mb-2">Bitte korrigieren Sie:</h4>
-                      <ul className="text-red-700 text-sm space-y-1">
-                        {errors.map((error, index) => (
-                          <li key={index}>• {error}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Mockup Stage */}
-              <div className="bg-white rounded-xl shadow-xl overflow-hidden">
-                <div className="h-96 relative">
-                  <NeonMockupStage
-                    lengthCm={longestSide}
-                    waterproof={config.isWaterproof}
-                    neonOn={true}
-                    uvOn={config.hasUvPrint || true}
-                    selectedBackground={selectedBackground}
-                    onBackgroundChange={setSelectedBackground}
-                    onWaterproofChange={(isWaterproof) => handleConfigChange({ isWaterproof })}
-                  />
-                </div>
-              </div>
+        {/* Mobile Layout - Completely Redesigned */}
+        <div className={`lg:hidden ${currentStep === 'cart' ? 'hidden' : ''}`}>
+          {/* STEP 1: Design Selection - Primary Focus */}
+          <div className="bg-white rounded-2xl shadow-lg mx-4 mb-6 overflow-hidden mt-20">
+            {/* Simple Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4">
+              <h1 className="text-xl font-bold text-white text-center">Neon-Schild Designer</h1>
             </div>
-
-            {/* Right Column - Pricing */}
-            <div className="lg:col-span-4">
-              <div className="bg-white rounded-xl lg:rounded-2xl shadow-xl p-4 lg:p-6 sticky top-6">
-                <div className="flex items-center space-x-2 lg:space-x-3 mb-4 lg:mb-6">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-2">
-                    <Calculator className="h-5 lg:h-6 w-5 lg:w-6 text-white" />
-                  </div>
-                  <h2 className="text-lg lg:text-xl font-bold text-gray-800">Preiskalkulation</h2>
-                  
-                  {signPrices.length > 0 && (
-                    <div className="ml-auto">
-                      <button
-                        onClick={() => setCurrentView('cart')}
-                        className="relative bg-blue-600 hover:bg-blue-700 text-white p-2 lg:p-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl active:scale-95"
-                      >
-                        <ShoppingCart className="h-5 lg:h-6 w-5 lg:w-6" />
-                        <div className="absolute -top-1 lg:-top-2 -right-1 lg:-right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 lg:h-6 w-5 lg:w-6 flex items-center justify-center">
-                          {signPrices.filter(s => s.isEnabled).length}
-                        </div>
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Selbstabholung Option */}
-                <div className="mb-4 lg:mb-6">
-                  <div className="flex items-center space-x-2 mb-3">
-                    <Home className="h-5 w-5 text-green-600" />
-                    <h3 className="text-sm lg:text-base font-semibold text-gray-800">Selbstabholung</h3>
-                  </div>
-
-                  <div className={`flex items-center space-x-3 p-3 border-2 rounded-lg transition-all duration-300 cursor-pointer ${
-                    config.includesInstallation
-                      ? 'border-gray-200 bg-gray-100 cursor-not-allowed opacity-50'
-                      : config.selectedShipping && config.selectedShipping.type === 'pickup'
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 lg:hover:border-gray-300 lg:hover:bg-gray-50'
-                  }`}
-                  onClick={() => {
-                    if (config.includesInstallation) return;
-                    
-                    if (config.selectedShipping && config.selectedShipping.type === 'pickup') {
-                      handleShippingChange(null);
-                    } else {
-                      handleShippingChange({
-                        type: 'pickup',
-                        name: 'Selbstabholung',
-                        price: 0,
-                        description: 'Kostenlose Abholung in 67433 Neustadt'
-                      });
-                    }
-                  }}
-                  >
-                    <div className={`w-5 lg:w-4 h-5 lg:h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                      config.includesInstallation
-                        ? 'border-gray-300 bg-gray-200'
-                        : config.selectedShipping && config.selectedShipping.type === 'pickup'
-                        ? 'border-green-600 bg-green-600'
-                        : 'border-gray-400 bg-white'
-                    }`}>
-                      {!config.includesInstallation && 
-                       (config.selectedShipping && config.selectedShipping.type === 'pickup') && (
-                        <div className="w-2 h-2 rounded-full bg-white"></div>
-                      )}
-                    </div>
-                    
-                    <div className={`p-2 rounded-lg flex-shrink-0 ${
-                      config.includesInstallation
-                        ? 'bg-gray-200 text-gray-400'
-                        : config.selectedShipping && config.selectedShipping.type === 'pickup'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      <Home className="h-4 w-4" />
-                    </div>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-gray-800 text-sm truncate pr-2">Selbstabholung</h4>
-                        <span className="font-bold text-sm text-gray-800 flex-shrink-0">Kostenlos</span>
-                      </div>
-                      <p className="text-xs text-gray-600 mt-1 leading-relaxed">Kostenlose Abholung in 67433 Neustadt</p>
-                      
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setShowPostalCodeInput(true);
-                        }}
-                        className="mt-2 w-full px-3 py-2 lg:py-1.5 text-xs bg-blue-100 text-blue-700 rounded-md lg:hover:bg-blue-200 transition-colors"
-                      >
-                        Wie weit von mir?
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Shipping Cost Information */}
-                {signPrices.filter(s => s.isEnabled).length > 0 && !config.includesInstallation && (
-                  <div className="mb-4 lg:mb-6">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <Truck className="h-5 w-5 text-blue-600" />
-                      <h3 className="text-sm lg:text-base font-semibold text-gray-800">Versandkosten-Information</h3>
-                    </div>
-                    
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4">
-                      {shippingInfo.requiresPostalCode && !config.customerPostalCode ? (
-                        <>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-blue-800 font-medium text-sm lg:text-base">PLZ erforderlich: €0</span>
-                            <span className="text-blue-600 text-sm">()</span>
-                          </div>
-                          <p className="text-blue-700 text-sm mb-3 leading-relaxed">
-                            Längste Seite: {longestSide}cm (≥240cm) → Postleitzahl eingeben für Kostenberechnung
-                          </p>
-                          <button
-                            onClick={() => setShowPostalCodeInput(true)}
-                            className="w-full py-3 bg-blue-600 text-white rounded-lg lg:hover:bg-blue-700 transition-colors"
-                          >
-                            Postleitzahl eingeben
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-blue-800 font-medium text-sm lg:text-base truncate pr-2">{shippingInfo.method}: €{shippingInfo.cost}</span>
-                            <span className="text-blue-600 text-sm">({shippingInfo.days})</span>
-                          </div>
-                          <p className="text-blue-700 text-sm leading-relaxed">
-                            Längste Seite: {longestSide}cm → {shippingInfo.description}
-                          </p>
-                          
-                          {config.customerPostalCode && (
-                            <div className="mt-3 bg-white rounded-lg p-3 border border-blue-200">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center space-x-2">
-                                  <MapPin className="h-4 w-4 text-blue-600" />
-                                  <span className="text-sm font-medium text-gray-700">Lieferadresse:</span>
-                                </div>
-                                <button
-                                  onClick={() => setShowPostalCodeInput(true)}
-                                  className="text-xs text-blue-600 lg:hover:text-blue-800 underline"
-                                >
-                                  Ändern
-                                </button>
-                              </div>
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-1 sm:space-y-0">
-                                <div className="text-sm text-gray-800">
-                                  <span className="font-medium">{distanceInfo.cityName}</span>
-                                  <span className="text-gray-500 ml-1">({config.customerPostalCode})</span>
-                                </div>
-                                <div className="text-sm font-medium text-blue-600">
-                                  {distanceInfo.distance} km
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                      {config.selectedShipping?.type === 'pickup' && (
-                        <p className="text-green-700 text-sm font-medium mt-2">
-                          ✓ Bei Selbstabholung entfallen die Versandkosten
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Additional Costs Section */}
-                {(config.isWaterproof || installation > 0 || actualShippingCost > 0 || expressProductionCost > 0) && (
-                  <div className="mb-4">
-                    <h3 className="text-sm lg:text-base font-semibold text-gray-800 mb-3">Zusatzkosten</h3>
-                    <div className="space-y-2 bg-gray-50 rounded-lg p-3">
-                      {config.isWaterproof && (
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="text-gray-700 font-medium text-sm">Wasserdicht (IP65)</span>
-                            <div className="text-sm text-gray-500">+25% Aufpreis</div>
-                          </div>
-                          <span className="font-semibold text-gray-800 text-sm lg:text-base">€{(enabledSignsTotal * 0.25).toFixed(2)}</span>
-                        </div>
-                      )}
-                      
-                      {expressProductionCost > 0 && (
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <span className="text-gray-700 font-medium text-sm">Express Herstellung</span>
-                            <div className="text-sm text-gray-500">4-6 Tage statt Standard</div>
-                          </div>
-                          <span className="font-semibold text-gray-800 text-sm lg:text-base">€{expressProductionCost.toFixed(2)}</span>
-                        </div>
-                      )}
-                      
-                      {installation > 0 && config.customerPostalCode && /^\d{5}$/.test(config.customerPostalCode) && (
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className="text-gray-700 font-medium text-sm">Montage-Service</span>
-                            <div className="text-sm text-gray-500 leading-relaxed">
-                              Montage + Anfahrt
-                              <span className="font-medium text-blue-600">
-                                {' '}({distanceInfo.distance} km)
-                              </span>
-                            </div>
-                          </div>
-                          <span className="font-semibold text-gray-800 text-sm lg:text-base">€{installation.toFixed(2)}</span>
-                        </div>
-                      )}
-                      
-                      {actualShippingCost > 0 && (
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <span className="text-gray-700 font-medium text-sm">Versand</span>
-                            <div className="text-sm text-gray-500 leading-relaxed">
-                              {shippingInfo.method === 'Lokale Zustellung' ? `Lokale Zustellung (${distanceInfo.distance} km × €3,00)` : shippingInfo.method}
-                              {config.customerPostalCode && shippingInfo.requiresPostalCode && (
-                                <span className="font-medium text-blue-600">
-                                  {' '}({distanceInfo.distance} km)
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <span className="font-semibold text-gray-800 text-sm lg:text-base">€{actualShippingCost.toFixed(2)}</span>
-                        </div>
-                      )}
-                      
-                      {config.includesInstallation && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mt-2">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <span className="text-green-800 font-medium text-sm">Versandkostenfrei</span>
-                          </div>
-                          <p className="text-green-700 text-xs">
-                            Bei Montage-Service entfallen alle Versandkosten
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Price Summary */}
-                {(signPrices.length > 0 || !isCurrentDesignInList) && (
-                  <div className="border-t pt-3 space-y-2 mb-4">
-                    <div className="flex justify-between text-sm lg:text-base text-gray-700">
-                      <span>{isCurrentDesignInList ? 'Ausgewählte Schilder:' : 'Aktuelles Design:'}</span>
-                      <span className="font-semibold">€{enabledSignsTotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm lg:text-base text-gray-700">
-                      <span>Zusatzkosten:</span>
-                      <span className="font-semibold">€{additionalCosts.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm lg:text-base text-gray-700">
-                      <span>Zwischensumme:</span>
-                      <span className="font-semibold">€{subtotal.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm lg:text-base text-gray-700">
-                      <span>MwSt. (19%):</span>
-                      <span className="font-semibold">€{tax.toFixed(2)}</span>
-                    </div>
-                  </div>
-                )}
-                        
-                {/* Gesamtpreis */}
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4 mb-4 border-2 border-green-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg lg:text-xl font-bold text-gray-800">Gesamtpreis:</span>
-                    <span className="text-3xl font-bold text-green-600">
-                      €{gesamtpreis.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="mt-2 text-sm text-gray-600 leading-relaxed">
-                    {isCurrentDesignInList 
-                      ? `${signPrices.filter(s => s.isEnabled).length} Schild(er) ausgewählt`
-                      : `Aktuelles Design: ${config.selectedDesign.name}`
-                    }
-                    {config.customerPostalCode && (
-                      <span>
-                        {' '}• Entfernung: {distanceInfo.distance} km nach {distanceInfo.cityName}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Savings Notification */}
-                {signPrices.filter(s => s.isEnabled).length > 0 && 
-                 !config.includesInstallation && 
-                 actualShippingCost > 0 && 
-                 longestSide > 120 && (
-                  <div className="bg-green-100 border border-green-300 rounded-lg p-3 mb-3">
-                    <p className="text-green-800 font-medium text-xs text-center">
-                      💰 Sie können €{actualShippingCost.toFixed(2)} ersparen bei Selbstabholung!
-                    </p>
-                  </div>
-                )}
-
-                {/* Payment Button */}
-                <div className="space-y-3">
-                  <button 
-                    onClick={() => setCurrentView('cart')}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 rounded-lg lg:hover:from-blue-700 lg:hover:to-purple-700 transition duration-300 lg:transform lg:hover:scale-105 shadow-lg lg:hover:shadow-xl flex items-center justify-center space-x-2 lg:space-x-3 disabled:opacity-50 disabled:cursor-not-allowed lg:disabled:transform-none active:scale-95"
-                    disabled={signPrices.filter(s => s.isEnabled).length === 0 && isCurrentDesignInList}
-                  >
-                    <CreditCard className="h-5 w-5" />
-                    <span className="text-sm lg:text-base">Warenkorb - €{gesamtpreis.toFixed(2)}</span>
-                  </button>
-                  
-                  {/* Payment Methods */}
-                  <div className="bg-gray-50 rounded-lg p-3 lg:p-2 border">
-                    <div className="flex items-center justify-center space-x-2 mb-1">
-                      <span className="text-xs text-gray-600">Sichere Zahlung:</span>
-                    </div>
-                    <div className="flex items-center justify-center space-x-1 lg:space-x-2 flex-wrap gap-1">
-                      <div className="bg-white rounded px-2 lg:px-1.5 py-1 lg:py-0.5 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 bg-blue-600 rounded-sm flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">V</span>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded px-2 lg:px-1.5 py-1 lg:py-0.5 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 flex items-center justify-center">
-                          <div className="flex space-x-0.5">
-                            <div className="w-1.5 h-1.5 bg-red-500 rounded-full"></div>
-                            <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full -ml-0.5"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded px-2 lg:px-1.5 py-1 lg:py-0.5 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 flex items-center justify-center">
-                          <div className="flex space-x-0.5">
-                            <div className="w-1 h-2 bg-blue-600 rounded-full"></div>
-                            <div className="w-1 h-2 bg-blue-400 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded px-2 lg:px-1.5 py-1 lg:py-0.5 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 bg-green-600 rounded-sm flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">€</span>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded px-2 lg:px-1.5 py-1 lg:py-0.5 shadow-sm border flex items-center">
-                        <div className="w-6 h-3 bg-red-600 rounded-sm flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">G</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-gray-500 text-center mt-2 leading-relaxed">
-                    Powered by Stripe • 14 Tage Widerrufsrecht • Käuferschutz
-                  </p>
+            
+            {/* Design Display - Simplified */}
+            <div className="p-6">
+              <DesignSelector
+                designs={availableDesigns}
+                selectedDesign={config.selectedDesign}
+                onDesignChange={handleDesignChange}
+                onToggleDesign={handleToggleDesign}
+                config={config}
+                isWaterproof={config.isWaterproof}
+                isTwoPart={config.isTwoPart}
+                hasUvPrint={config.hasUvPrint}
+                onUvPrintChange={(hasUvPrint) => handleConfigChange({ hasUvPrint })}
+                onConfigChange={handleConfigChange}
+              />
+              <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="text-center text-gray-500 text-sm">
+                  Weitere Optionen folgen
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <footer className="bg-white border-t mt-12">
-          <div className="max-w-7xl mx-auto px-4 py-8">
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="md:col-span-2">
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-2">
-                    <Zap className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800">Nontel</h3>
-                </div>
-                <p className="text-gray-600 mb-4 leading-relaxed">
-                  Professionelle LED-Neon-Schilder nach Maß. Hochwertige Qualität, 
-                  individuelle Gestaltung und schnelle Lieferung.
-                </p>
-                <div className="text-sm text-gray-600">
-                  <p>📍 Hermann-Wehrle-Str. 10, 67433 Neustadt</p>
-                  <p>📞 +49 163 1661464</p>
-                  <p>📧 info@nontel.de</p>
+          
+          {/* STEP 2: Size - Single Focus */}
+          <div className="bg-white rounded-2xl shadow-lg mx-4 mb-6 p-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-6 text-center">Größe wählen</h2>
+            
+            {/* Width Slider - Primary Control */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-gray-600 font-medium">Breite</span>
+                <div className="bg-blue-600 text-white px-4 py-2 rounded-full font-bold">
+                  {config.customWidth} cm
                 </div>
               </div>
               
-              <div>
-                <h4 className="font-semibold text-gray-800 mb-4">Rechtliches</h4>
-                <div className="space-y-2 text-sm">
-                  <Link to="/impressum" className="block text-gray-600 hover:text-blue-600 transition-colors">
-                    Impressum
-                  </Link>
-                  <Link to="/datenschutz" className="block text-gray-600 hover:text-blue-600 transition-colors">
-                    Datenschutz
-                  </Link>
-                  <Link to="/agb" className="block text-gray-600 hover:text-blue-600 transition-colors">
-                    AGB
-                  </Link>
-                  <Link to="/widerrufsrecht" className="block text-gray-600 hover:text-blue-600 transition-colors">
-                    Widerrufsrecht
-                  </Link>
-                </div>
-              </div>
+              <input
+                type="range"
+                min="20"
+                max={config.isTwoPart ? 1000 : 300}
+                value={config.customWidth}
+                onChange={(e) => handleConfigChange({ customWidth: Number(e.target.value) })}
+                className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+              />
               
-              <div>
-                <h4 className="font-semibold text-gray-800 mb-4">Service</h4>
-                <div className="space-y-2 text-sm">
-                  <Link to="/zahlung-versand" className="block text-gray-600 hover:text-blue-600 transition-colors">
-                    Zahlung & Versand
-                  </Link>
-                  <a href="tel:+491631661464" className="block text-gray-600 hover:text-blue-600 transition-colors">
-                    Kontakt
-                  </a>
-                </div>
+              <div className="flex justify-between text-sm text-gray-500 mt-2">
+                <span>20cm</span>
+                <span>{config.isTwoPart ? '10m' : '3m'}</span>
               </div>
             </div>
             
-            <div className="border-t mt-8 pt-6 flex flex-col md:flex-row items-center justify-between">
-              <p className="text-sm text-gray-500">
-                © 2025 Nontel. Alle Rechte vorbehalten.
-              </p>
-              <MondayStatus />
+            {/* Height Display - Secondary Info */}
+            <div className="bg-purple-50 rounded-xl p-4 text-center">
+              <div className="text-sm text-purple-600 font-medium mb-1">Höhe (automatisch)</div>
+              <div className="text-2xl font-bold text-purple-800">{config.calculatedHeight} cm</div>
             </div>
           </div>
-        </footer>
+          
+          {/* STEP 3: Options - Simplified */}
+          <div className="bg-white rounded-2xl shadow-lg mx-4 mb-6 p-6">
+            <div className="flex items-center justify-center space-x-3 mb-6">
+              <div className="text-white text-xl">⚙️</div>
+              <h2 className="text-lg font-bold text-gray-800 text-center">Optionen</h2>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Waterproof - Simplified */}
+              <label className="flex items-center justify-between p-4 bg-blue-50 rounded-xl cursor-pointer">
+                <div>
+                  <div className="font-semibold text-gray-800">Wasserdicht</div>
+                  <div className="text-sm text-gray-500">+25% Aufpreis</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={config.isWaterproof}
+                  onChange={(e) => handleConfigChange({ isWaterproof: e.target.checked })}
+                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 rounded mt-0.5 flex-shrink-0"
+                />
+              </label>
+              
+              {/* Two-Part - Simplified */}
+              <label className="flex items-center justify-between p-4 bg-orange-50 rounded-xl cursor-pointer">
+                <div>
+                  <div className="font-semibold text-gray-800">Mehrteilig</div>
+                  <div className="text-sm text-gray-500">+15% Aufpreis</div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={config.isTwoPart || false}
+                  onChange={(e) => handleConfigChange({ isTwoPart: e.target.checked })}
+                  className="w-6 h-6 text-orange-600 rounded focus:ring-orange-500"
+                />
+              </label>
+              
+              <label className="flex items-start space-x-3 cursor-pointer p-3 hover:bg-gray-50 rounded-lg transition-colors border border-gray-200">
+                <input
+                  type="checkbox"
+                  checked={config.hasUvPrint}
+                  onChange={(e) => handleConfigChange({ hasUvPrint: e.target.checked })}
+                  className="w-5 h-5 text-purple-600 focus:ring-purple-500 rounded mt-0.5 flex-shrink-0"
+                />
+                <div className="flex items-center space-x-1">
+                  <span className="text-purple-800 font-bold text-sm">UV-Druck</span>
+                  <div className="relative group">
+                    <Info className="h-4 w-4 text-purple-500 hover:text-purple-700 cursor-help transition-colors flex-shrink-0" />
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                      Es werden extra Hängehalterungen eingepackt damit das Schild aufhängen kann auf zwei Stahl Drähte, ansonsten werden ganz normale Abstandhalterungen geliefert (im Preis inkl.)
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  </div>
+                </div>
+              </label>
+              
+              <div className="flex items-start space-x-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+                <div className="w-4 h-4 flex items-center justify-center mt-0.5 flex-shrink-0">
+                  <div className="w-3 h-3 bg-gray-300 rounded border"></div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="text-red-600 text-lg flex-shrink-0">🔥</div>
+                  <div>
+                    <span className="text-gray-700 font-medium text-sm">Super EXPRESS Produktion</span>
+                    <div className="text-sm text-gray-500">1 Tag • Muss telefonisch abgeklärt werden</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* Postal Code Input Modal */}
-        {showPostalCodeInput && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
-              <div className="flex items-center space-x-2 mb-4">
-                <MapPin className="h-5 w-5 text-blue-600" />
-                <h3 className="text-lg font-semibold text-gray-800">Postleitzahl eingeben</h3>
+
+        {/* Desktop Layout - Unchanged */}
+        <div className={`hidden lg:block ${currentStep === 'cart' ? 'lg:hidden' : ''}`}>
+          {/* 1. Großer Hintergrundbereich (Produktvorschau) - Volle Breite */}
+          <div className="mb-8 -mx-4 sm:-mx-6 lg:-mx-8 -mt-6 md:-mt-12">
+            {/* Großes Mockup-Bild - Volle Breite */}
+          <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 h-[600px] pt-20 flex items-center justify-center w-full border-4 border-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 shadow-2xl overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500/10 before:via-purple-500/10 before:to-pink-500/10 before:animate-pulse before:pointer-events-none after:absolute after:inset-0 after:border-2 after:border-gradient-to-r after:from-cyan-400/20 after:via-purple-400/20 after:to-pink-400/20 after:rounded-lg after:animate-pulse after:pointer-events-none">
+            {/* Stylische Ecken-Ornamente */}
+            <div className="absolute top-4 left-4 w-8 h-8 border-l-3 border-t-3 border-blue-400/60 rounded-tl-xl z-10"></div>
+            <div className="absolute top-4 right-4 w-8 h-8 border-r-3 border-t-3 border-purple-400/60 rounded-tr-xl z-10"></div>
+            <div className="absolute bottom-4 left-4 w-8 h-8 border-l-3 border-b-3 border-pink-400/60 rounded-bl-xl z-10"></div>
+            <div className="absolute bottom-4 right-4 w-8 h-8 border-r-3 border-b-3 border-cyan-400/60 rounded-br-xl z-10"></div>
+            
+            {/* Glowing border effect */}
+            <div className="absolute inset-2 rounded-xl bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 animate-pulse pointer-events-none z-10"></div>
+            
+              <NeonMockupStage
+  lengthCm={config.customWidth}        // dein Breite-Wert in cm
+  waterproof={config.isWaterproof}     // Wasserdicht-Knopf
+  uvOn={!!config.hasUvPrint}           // UV-Druck
+  neonOn={neonOn && !isResizing}       // Neon an/aus - automatisch aus während Größenänderung
+/* optional – falls du diese States schon hast:
+  bgBrightness={bgHelligkeit}
+  neonIntensity={neonStaerke}
+  sceneZoom={sceneZoom}
+*/
+ />
+              
+              <button
+                onClick={() => {
+                  const currentIndex = availableDesigns.findIndex(d => d.id === config.selectedDesign.id);
+                  const prevIndex = currentIndex > 0 ? currentIndex - 1 : availableDesigns.length - 1;
+                  handleDesignChange(availableDesigns[prevIndex]);
+                }}
+                className="absolute left-6 top-1/2 transform -translate-y-1/2 transition-all duration-300"
+              >
+                <ChevronLeft className="h-12 w-6 text-white drop-shadow-lg" />
+              </button>
+              
+              <button
+                onClick={() => {
+                  const currentIndex = availableDesigns.findIndex(d => d.id === config.selectedDesign.id);
+                  const nextIndex = currentIndex < availableDesigns.length - 1 ? currentIndex + 1 : 0;
+                  handleDesignChange(availableDesigns[nextIndex]);
+                }}
+                className="absolute right-6 top-1/2 transform -translate-y-1/2 transition-all duration-300"
+              >
+                <ChevronRight className="h-12 w-6 text-white drop-shadow-lg" />
+              </button>
+              
+              {/* Design Indicators */}
+              <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-3">
+                {availableDesigns.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleDesignChange(availableDesigns[index])}
+                    className={`w-4 h-4 rounded-full transition-all duration-300 border-2 border-white/50 ${
+                      index === availableDesigns.findIndex(d => d.id === config.selectedDesign.id)
+                        ? 'bg-white shadow-lg shadow-white/50 scale-125'
+                        : 'bg-white/30 hover:bg-white/60 backdrop-blur-sm'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            
+            {/* 2. Produktinformationen direkt unter dem Mockup - ohne Container */}
+            <div className="mx-4 sm:mx-6 lg:mx-8 -mt-1">
+              <div className="flex items-center justify-between text-xs py-3 px-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm border border-gray-100">
+                {/* Technische Daten Abteilung - Links */}
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-xs font-bold text-green-800">Technische Daten</span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div>
+                      <span className="text-green-700">Elemente:</span>
+                      <span className="font-bold text-green-600 ml-1">{config.selectedDesign.elements}</span>
+                    </div>
+                    <div>
+                      <span className="text-green-700">LED-Länge:</span>
+                      <span className="font-bold text-green-600 ml-1">
+                        {calculateProportionalLedLength(
+                          config.selectedDesign.originalWidth,
+                          config.selectedDesign.originalHeight,
+                          config.selectedDesign.ledLength,
+                          config.customWidth,
+                          config.calculatedHeight
+                        )}m
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-green-700">Verbrauch:</span>
+                      <span className="font-bold text-green-600 ml-1">
+                        {Math.round(calculateProportionalLedLength(
+                          config.selectedDesign.originalWidth,
+                          config.selectedDesign.originalHeight,
+                          config.selectedDesign.ledLength,
+                          config.customWidth,
+                          config.calculatedHeight
+                        ) * 8 * 1.25)}W
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Originale Daten Abteilung - Rechts */}
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs font-bold text-blue-800">Originale Daten</span>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <div>
+                      <span className="text-blue-700">Breite:</span>
+                      <span className="font-bold text-blue-600 ml-1">{config.selectedDesign.originalWidth}cm</span>
+                    </div>
+                    <div>
+                      <span className="text-blue-700">Höhe:</span>
+                      <span className="font-bold text-blue-600 ml-1">{config.selectedDesign.originalHeight}cm</span>
+                    </div>
+                    <div>
+                      <span className="text-blue-700">LED-Länge:</span>
+                      <span className="font-bold text-blue-600 ml-1">{config.selectedDesign.ledLength}m</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* 3. Zwei-Spalten-Layout für Konfiguration und Optionen */}
+          <div className="w-full">
+            {/* Links - Konfiguration */}
+            <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-2">
+                    <Ruler className="h-6 w-6 text-white" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-800">Konfiguration</h2>
+                </div>
+                
+                {/* Versand berechnen Button rechts */}
+                <div className="flex items-center space-x-3">
+                  {/* Hinzufügen Button */}
+                  {isAddingToCart ? (
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4">
+                      <div className="flex items-center space-x-2 animate-pulse">
+                        <div className="bg-green-500 rounded-full p-0.5">
+                          <svg className="w-4 h-4 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="text-xs text-blue-600 font-medium mt-1">
+                          Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
+                        </div>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-green-800 font-bold text-base animate-pulse">Im Warenkorb</span>
+                          Dafür werden zusätzliche Kosten berechnet.<br/>Brauchst du es noch schneller? Dann ruf uns unverzüglich an: +4915225325349
+                          €{currentDesignPrice.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleToggleDesign(config.selectedDesign, true)}
+                      className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl flex items-center space-x-3 text-lg group relative overflow-hidden z-20"
+                    >
+                      {/* Glowing background animation */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300 animate-pulse"></div>
+                      
+                      <div className="bg-white/20 rounded-full p-0.5">
+                        <svg className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                      </div>
+                      <span className="font-bold relative z-10">{currentDesignCount > 0 ? 'Weitere hinzufügen' : 'Hinzufügen'}</span>
+                      <div className="bg-white/20 rounded-full px-3 py-1 text-base font-bold">
+                        €{currentDesignPrice.toFixed(2)}
+                      </div>
+                    </button>
+                  )}
+                  
+                  {/* Versand berechnen Button */}
+                  <div className="relative">
+                    <button 
+                      onClick={handleShowShippingPage}
+                      className="relative bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl flex items-center space-x-3 font-bold text-lg group z-10 overflow-hidden"
+                    >
+                      {/* Sliding background animation */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-out"></div>
+                      
+                      <Truck className="h-6 w-6 relative z-10 group-hover:animate-bounce" />
+                      <span className="font-bold relative z-10">Versand berechnen</span>
+                    </button>
+                    
+                    {/* Animated Cart Counter Badge - Outside button but inside wrapper */}
+                    {cartItemCount > 0 && (
+                      <div className="absolute -top-3 -right-3 bg-red-500 text-white text-sm font-bold rounded-full h-8 w-8 flex items-center justify-center animate-bounce shadow-xl border-3 border-white z-30">
+                        {cartItemCount}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
               
-              <p className="text-sm text-gray-600 mb-4">
-                Geben Sie Ihre Postleitzahl ein, um die Entfernung und Kosten zu berechnen.
-              </p>
+              {/* Maße einstellen */}
+              <div className="space-y-3 mb-4">
+                {/* Breite und Höhe in einer Reihe */}
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Breite */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Breite</label>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <input
+                        type="number"
+                        min="30"
+                        max={effectiveMaxWidth}
+                        value={config.customWidth}
+                        onChange={(e) => handleWidthChange(Number(e.target.value))}
+                        className="flex-1 px-2 py-1 border border-gray-300 rounded-lg text-center font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      />
+                      {isResizing && (
+                        <div className="absolute -top-1 -right-1 bg-yellow-500 text-white text-xs px-1 py-0.5 rounded animate-pulse">
+                          ⚡
+                        </div>
+                      )}
+                      {isResizing && (
+                        <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full animate-pulse">
+                          Neon wird neu berechnet...
+                        </div>
+                      )}
+                      <span className="text-gray-600 font-medium text-sm">cm</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="30"
+                      max={config.isTwoPart ? 1000 : 300}
+                      value={config.customWidth}
+                      onChange={(e) => handleConfigChange({ customWidth: Number(e.target.value) })}
+                      className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                    />
+                    <div className="flex justify-between text-xs text-gray-500 mt-1">
+                      <span>30cm</span>
+                      <span>{config.isTwoPart ? '10m' : '3m'}</span>
+                    </div>
+                    
+                    {/* Mehrteilig Option - Nur bei 300cm sichtbar */}
+                    {config.customWidth >= 300 && (
+                      <div className="mt-3 animate-fade-in">
+                        <label className="flex items-center space-x-2 cursor-pointer p-2 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={config.isTwoPart || false}
+                            onChange={(e) => handleConfigChange({ isTwoPart: e.target.checked })}
+                            className="w-4 h-4 text-orange-600 focus:ring-orange-500 rounded"
+                          />
+                          <Scissors className="h-4 w-4 text-orange-600" />
+                          <div className="flex items-center space-x-1 flex-1">
+                            <span className="text-sm font-medium text-orange-800">Mehrteilig (+15%)</span>
+                            <div className="relative group">
+                              <Info className="h-4 w-4 text-orange-500 hover:text-orange-700 cursor-help transition-colors" />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
+                                Das Schild wird aus mehreren Teilen gefertigt und muss vor Ort zusammengesetzt werden
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-orange-600">Erforderlich ab 300cm</div>
+                        </label>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Höhe */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">Höhe</label>
+                    <div className="bg-gray-100 px-2 py-2 rounded-lg text-center mb-1">
+                      <span className="text-lg font-bold text-gray-800">{config.calculatedHeight} cm</span>
+                    </div>
+                    <div className="text-xs text-gray-500 text-center">
+                      Automatisch berechnet
+                    </div>
+                    <div className="text-xs text-gray-500 text-center mt-1">
+                      Max: 200cm
+                    </div>
+                  </div>
+                </div>
+              </div>
               
-              <input
-                type="text"
-                placeholder="z.B. 10115"
-                value={tempPostalCode}
-                onChange={(e) => setTempPostalCode(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg mb-4"
-                maxLength={5}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handlePostalCodeSubmit();
-                  }
-                }}
-              />
-              
-              <div className="flex space-x-3">
+              {/* Checkbox-Optionen */}
+              <div className="grid grid-cols-4 gap-2">
+                {/* Wasserdicht */}
                 <button
-                  onClick={handlePostalCodeSubmit}
-                  disabled={!tempPostalCode || !/^\d{5}$/.test(tempPostalCode)}
-                  className="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  onClick={() => handleConfigChange({ isWaterproof: !config.isWaterproof })}
+                  className={`flex flex-col items-center justify-center p-2 rounded-md border-2 transition-all duration-300 hover:scale-105 ${
+                    config.isWaterproof
+                      ? 'bg-blue-500 border-blue-500 text-white shadow-lg'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300 hover:bg-blue-50'
+                  }`}
                 >
-                  Berechnen
+                  <Shield className="h-4 w-4 mb-0.5" />
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs font-medium leading-tight">Wasserdicht</span>
+                    <div className="relative group">
+                      <Info className="h-4 w-4 text-blue-400 hover:text-blue-600 cursor-help transition-colors" />
+                      <div className="absolute bottom-full left-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20 min-w-max">
+                        Für Außenbereich geeignet • UV-Schutz & Wasserschutz (IP65)
+                        <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs opacity-75 leading-tight">+25%</span>
                 </button>
+                
+                {/* UV-Druck */}
                 <button
-                  onClick={() => {
-                    setShowPostalCodeInput(false);
-                    setTempPostalCode('');
-                  }}
-                  className="flex-1 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  onClick={() => handleConfigChange({ hasUvPrint: !config.hasUvPrint })}
+                  className={`flex flex-col items-center justify-center p-2 rounded-md border-2 transition-all duration-300 hover:scale-105 relative ${
+                    config.hasUvPrint
+                      ? 'bg-purple-500 border-purple-500 text-white shadow-lg'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-purple-300 hover:bg-purple-50'
+                  }`}
                 >
-                  Abbrechen
+                  <Palette className="h-4 w-4 mb-0.5" />
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs font-medium leading-tight">UV-Druck</span>
+                    <div className="relative group">
+                      <Info className="h-4 w-4 text-purple-400 hover:text-purple-600 cursor-help transition-colors" />
+                      <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20 min-w-max">
+                        Hochwertige UV-Farben im Hintergrund
+                        <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs opacity-75 leading-tight">Empfohlen</span>
+                </button>
+                
+                {/* Hängesystem */}
+                <button
+                  onClick={() => handleConfigChange({ hasHangingSystem: !(config.hasHangingSystem || false) })}
+                  className={`flex flex-col items-center justify-center p-2 rounded-md border-2 transition-all duration-300 hover:scale-105 ${
+                    config.hasHangingSystem || false
+                      ? 'bg-green-500 border-green-500 text-white shadow-lg'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-green-300 hover:bg-green-50'
+                  }`}
+                >
+                  <div className="text-green-600 text-lg mb-0.5">🔗</div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs font-medium leading-tight">Hängesystem</span>
+                    <div className="relative group">
+                      <Info className="h-4 w-4 text-green-400 hover:text-green-600 cursor-help transition-colors" />
+                      <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20 min-w-max">
+                        Spezielle Aufhängevorrichtung für die Montage an Stahlseilen. Ohne diese Option erhalten Sie Standard-Wandhalterungen.
+                        <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs opacity-75 leading-tight">Optional</span>
+                </button>
+                
+                {/* Express Herstellung - In der Reihe */}
+                <button
+                  onClick={() => handleConfigChange({ expressProduction: !(config.expressProduction || false) })}
+                  className={`flex flex-col items-center justify-center p-2 rounded-md border-2 transition-all duration-300 hover:scale-105 ${
+                    config.expressProduction || false
+                      ? 'bg-orange-500 border-orange-500 text-white shadow-lg'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-orange-300 hover:bg-orange-50'
+                  }`}
+                >
+                  <div className="text-orange-600 text-lg mb-0.5">⚡</div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-xs font-medium leading-tight">Express Herstellung</span>
+                    <div className="relative group">
+                      <Info className="h-4 w-4 text-orange-400 hover:text-orange-600 cursor-help transition-colors" />
+                      <div className="absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20 min-w-max">
+                        5 Tage anstatt 2-3 Wochen Produktionszeit
+                        <div className="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs opacity-75 leading-tight">+30%</span>
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Cart View - Mobile and Desktop */}
+        {currentStep === 'cart' && (
+          <div className="pt-20 lg:pt-0">
+            <CartCheckout
+              isCurrentDesignAdded={isCurrentDesignAdded}
+              currentWidth={config.customWidth}
+              currentHeight={config.calculatedHeight}
+              signs={config.signs}
+              onSignToggle={handleSignToggle}
+              onRemoveSign={handleRemoveSign}
+              isWaterproof={config.isWaterproof}
+              isTwoPart={config.isTwoPart}
+              hasUvPrint={config.hasUvPrint}
+              config={config}
+              onConfigChange={handleConfigChange}
+              onShippingChange={handleShippingChange}
+            />
           </div>
         )}
+      </main>
+
+      {false && (
+        <div className="hidden lg:block fixed bottom-6 right-6 z-40">
+          <PricingCalculator
+            config={config}
+            onConfigChange={handleConfigChange}
+            onRemoveSign={handleRemoveSign}
+            onGoToCart={handleGoToCart}
+          />
+        </div>
+      )}
+
+      {/* Mobile Cart Sticky Bottom */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 shadow-lg px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-sm text-gray-600">
+              {cartItemCount} Artikel • €{currentDesignPrice.toFixed(2)}
+            </div>
+            <div className="text-lg font-bold text-green-600">
+              Gesamt: €{(currentDesignPrice * 1.19).toFixed(2)}
+            </div>
+          </div>
+          <button
+            onClick={handleGoToCart}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold"
+          >
+            Warenkorb
+          </button>
+        </div>
       </div>
+
+      {/* Monday Status - Static Footer */}
+      <div className="mt-8 mb-4">
+        <MondayStatus />
+      </div>
+      
+      {/* Footer */}
+      <footer className="text-gray-500 py-4 px-4 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs">
+              <span className="font-medium text-gray-700">© 2025, Nontel Alle Rechte vorbehalten</span>
+              <a href="/widerrufsrecht" className="hover:text-blue-600 transition-colors font-medium">
+                Widerrufsrecht
+              </a>
+              <span className="text-gray-300">•</span>
+              <a href="/datenschutz" className="hover:text-blue-600 transition-colors font-medium">
+                Datenschutzerklärung
+              </a>
+              <span className="text-gray-300">•</span>
+              <a href="/agb" className="hover:text-blue-600 transition-colors font-medium">
+                AGB
+              </a>
+              <span className="text-gray-300">•</span>
+              <a href="/zahlung-versand" className="hover:text-blue-600 transition-colors font-medium">
+                Zahlung und Versand
+              </a>
+              <span className="text-gray-300">•</span>
+              <a href="/impressum" className="hover:text-blue-600 transition-colors font-medium">
+                Impressum
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+      </>
+      )}
+
     </div>
   );
-};
+}
 
 export default App;
