@@ -147,7 +147,7 @@ function HomePage() {
         </div>
 
         {/* Technical Data Bar */}
-        <div className="mb-3 bg-white rounded-lg shadow-sm p-4">
+        <div className="bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between">
             {/* Left side - Technical Data */}
             <div className="flex items-center space-x-6">
@@ -212,7 +212,7 @@ function HomePage() {
         </div>
 
         {/* Configuration Panel - Full Width */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
           <div className="flex items-center justify-between mb-6">
             {/* Left side - Title and Options */}
             <div className="flex items-center space-x-6">
