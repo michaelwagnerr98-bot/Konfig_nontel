@@ -33,21 +33,21 @@
 
 .slider::-webkit-slider-track {
   background: #d1d5db; /* Gray-300 */
-  height: 4px;
+  height: 2px;
   border-radius: 3px;
 }
 
 .slider::-moz-range-track {
   background: #d1d5db; /* Gray-300 */
-  height: 4px;
+  height: 2px;
   border-radius: 3px;
   border: none;
 }
 
 .slider::-webkit-slider-thumb {
   appearance: none;
-  height: 24px;
-  width: 24px;
+  height: 28px;
+  width: 16px;
   border-radius: 50%;
   background: linear-gradient(45deg, #3B82F6, #8B5CF6);
   cursor: pointer;
@@ -61,8 +61,8 @@
 }
 
 .slider::-moz-range-thumb {
-  height: 24px;
-  width: 24px;
+  height: 28px;
+  width: 16px;
   border-radius: 50%;
   background: linear-gradient(45deg, #3B82F6, #8B5CF6);
   cursor: pointer;
