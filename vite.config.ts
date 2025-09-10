@@ -29,6 +29,8 @@ export default defineConfig({
             // Add required headers for Monday.com API
             proxyReq.setHeader('User-Agent', 'Neon-Konfigurator/1.0');
             proxyReq.setHeader('Accept', 'application/json');
+            proxyReq.setHeader('Authorization', `Bearer ${process.env.VITE_MONDAY_API_TOKEN}`);
+            proxyReq.setHeader('API-Version', '2023-10');
           });
           proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('📥 Proxy Response:', proxyRes.statusCode);
