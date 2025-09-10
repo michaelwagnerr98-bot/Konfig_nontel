@@ -470,112 +470,37 @@ function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gradient-to-r from-slate-900 via-gray-900 to-slate-900 text-white relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 25% 25%, #3b82f6 0%, transparent 50%), 
-                             radial-gradient(circle at 75% 75%, #8b5cf6 0%, transparent 50%)`,
-            backgroundSize: '100px 100px'
-          }}></div>
-        </div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 py-12">
-          {/* Main Footer Content */}
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            {/* Company Info */}
-            <div className="text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start space-x-3 mb-4">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-2">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-white">Nontel</h3>
-              </div>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                Professionelle LED-Neon-Schilder<br/>
-                Individuell gefertigt in Deutschland
-              </p>
-              <div className="text-gray-400 text-sm space-y-1">
-                <p>Michael Wagner</p>
-                <p>Hermann-Wehrle-Str. 10</p>
-                <p>67433 Neustadt a.d. Weinstraße</p>
-              </div>
-            </div>
-            
-            {/* Quick Links */}
-            <div className="text-center">
-              <h4 className="text-lg font-semibold text-white mb-4">Rechtliches</h4>
-              <div className="space-y-3">
-                <a href="/agb" className="block text-gray-300 hover:text-blue-400 transition-colors text-sm">
-                  Allgemeine Geschäftsbedingungen
-                </a>
-                <a href="/datenschutz" className="block text-gray-300 hover:text-blue-400 transition-colors text-sm">
-                  Datenschutzerklärung
-                </a>
-                <a href="/widerrufsrecht" className="block text-gray-300 hover:text-blue-400 transition-colors text-sm">
-                  Widerrufsrecht
-                </a>
-                <a href="/zahlung-versand" className="block text-gray-300 hover:text-blue-400 transition-colors text-sm">
-                  Zahlung und Versand
-                </a>
-                <a href="/impressum" className="block text-gray-300 hover:text-blue-400 transition-colors text-sm">
-                  Impressum
-                </a>
-              </div>
-            </div>
-            
-            {/* Contact & Status */}
-            <div className="text-center md:text-right">
-              <h4 className="text-lg font-semibold text-white mb-4">Kontakt</h4>
-              <div className="space-y-2 text-sm text-gray-300 mb-4">
-                <p className="flex items-center justify-center md:justify-end space-x-2">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                  <span>+49 163 1661464</span>
-                </p>
-                <p className="flex items-center justify-center md:justify-end space-x-2">
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  <span>info@nontel.de</span>
-                </p>
-              </div>
-              
-              {/* System Status */}
-              <div className="flex justify-center md:justify-end">
-                <MondayStatus />
-              </div>
-            </div>
+      <footer className="bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          {/* Copyright oben */}
+          <div className="text-center text-gray-300 text-sm mb-4">
+            © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
           </div>
           
-          {/* Bottom Bar */}
-          <div className="border-t border-gray-700 pt-6">
-            <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-              {/* Copyright */}
-              <div className="text-gray-400 text-sm">
-                © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
-              </div>
-              
-              {/* Quick Legal Links */}
-              <div className="flex flex-wrap items-center justify-center space-x-1 text-xs text-gray-500">
-                <a href="/widerrufsrecht" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Widerrufsrecht</a>
-                <span className="text-gray-600">•</span>
-                <a href="/datenschutz" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Datenschutz</a>
-                <span className="text-gray-600">•</span>
-                <a href="/agb" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">AGB</a>
-                <span className="text-gray-600">•</span>
-                <a href="/zahlung-versand" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Zahlung & Versand</a>
-                <span className="text-gray-600">•</span>
-                <a href="/impressum" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Impressum</a>
-              </div>
-              
-              {/* USt-ID */}
-              <div className="text-gray-500 text-xs">
-                USt-IdNr.: DE328488548
-              </div>
+          {/* Kompakte rechtliche Links */}
+          <div className="flex flex-wrap items-center justify-center space-x-1 text-xs text-gray-400 mb-4">
+            <a href="/widerrufsrecht" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Widerrufsrecht</a>
+            <span className="text-gray-600">•</span>
+            <a href="/datenschutz" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Datenschutzerklärung</a>
+            <span className="text-gray-600">•</span>
+            <a href="/agb" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">AGB</a>
+            <span className="text-gray-600">•</span>
+            <a href="/zahlung-versand" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Zahlung und Versand</a>
+            <span className="text-gray-600">•</span>
+            <a href="/impressum" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Impressum</a>
+          </div>
+          
+          {/* Kontakt und Status in einer Zeile */}
+          <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0">
+            <div className="flex items-center space-x-4 text-xs text-gray-400">
+              <span>📞 +49 163 1661464</span>
+              <span>📧 info@nontel.de</span>
+              <span>USt-IdNr.: DE328488548</span>
+            </div>
+            
+            {/* System Status */}
+            <div className="flex justify-center">
+              <MondayStatus />
             </div>
           </div>
         </div>
