@@ -469,36 +469,6 @@ function HomePage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          {/* Ultra-kompakte einzeilige Anordnung */}
-          <div className="flex flex-col lg:flex-row items-center justify-between space-y-2 lg:space-y-0 text-xs">
-            {/* Links: Copyright */}
-            <div className="text-gray-400">
-              © 2025 Nontel - Michael Wagner
-            </div>
-            
-            {/* Mitte: Rechtliche Links */}
-            <div className="flex items-center space-x-1 text-gray-500">
-              <a href="/agb" className="hover:text-blue-400 transition-colors px-1">AGB</a>
-              <span>•</span>
-              <a href="/datenschutz" className="hover:text-blue-400 transition-colors px-1">Datenschutz</a>
-              <span>•</span>
-              <a href="/widerrufsrecht" className="hover:text-blue-400 transition-colors px-1">Widerruf</a>
-              <span>•</span>
-              <a href="/zahlung-versand" className="hover:text-blue-400 transition-colors px-1">Zahlung & Versand</a>
-              <span>•</span>
-              <a href="/impressum" className="hover:text-blue-400 transition-colors px-1">Impressum</a>
-            </div>
-            
-            {/* Rechts: Kontakt & Status */}
-            <div className="flex items-center space-x-3 text-gray-400">
-              <MondayStatus />
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
