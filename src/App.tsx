@@ -222,63 +222,6 @@ function HomePage() {
                 </div>
                 <h2 className="text-xl font-bold text-gray-800">Konfiguration</h2>
               </div>
-              
-              {/* Option Buttons in horizontal line */}
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => handleConfigChange({ isWaterproof: !config.isWaterproof })}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
-                    config.isWaterproof
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Shield className={`h-4 w-4 ${config.isWaterproof ? 'text-blue-600' : 'text-gray-400'}`} />
-                  <span className="font-medium">Wasserdicht</span>
-                  {config.isWaterproof && <span className="text-xs bg-blue-100 px-2 py-0.5 rounded">+25%</span>}
-                </button>
-
-                <button
-                  onClick={() => handleConfigChange({ hasUvPrint: !config.hasUvPrint })}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
-                    config.hasUvPrint
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Palette className={`h-4 w-4 ${config.hasUvPrint ? 'text-purple-600' : 'text-gray-400'}`} />
-                  <span className="font-medium">UV-Druck</span>
-                  {config.hasUvPrint && <span className="text-xs bg-purple-100 px-2 py-0.5 rounded">Empfohlen</span>}
-                </button>
-
-                <button
-                  onClick={() => handleConfigChange({ hasHangingSystem: !config.hasHangingSystem })}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
-                    config.hasHangingSystem
-                      ? 'border-gray-500 bg-gray-50 text-gray-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <svg className={`h-4 w-4 ${config.hasHangingSystem ? 'text-gray-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                  </svg>
-                  <span className="font-medium">Hängesystem</span>
-                  {config.hasHangingSystem && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">Optional</span>}
-                </button>
-
-                <button
-                  onClick={() => handleConfigChange({ expressProduction: !config.expressProduction })}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
-                    config.expressProduction
-                      ? 'border-orange-500 bg-orange-50 text-orange-700'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <Zap className={`h-4 w-4 ${config.expressProduction ? 'text-orange-600' : 'text-gray-400'}`} />
-                  <span className="font-medium">Express</span>
-                  {config.expressProduction && <span className="text-xs bg-orange-100 px-2 py-0.5 rounded">+30%</span>}
-                </button>
-              </div>
             </div>
             
             {/* Right side - Action Buttons */}
@@ -399,6 +342,63 @@ function HomePage() {
                 <div className="text-xs text-gray-500">Max: 200cm</div>
               </div>
             </div>
+          </div>
+
+          {/* Option Buttons - Below width/height section */}
+          <div className="flex items-center justify-center space-x-3 mt-6">
+            <button
+              onClick={() => handleConfigChange({ isWaterproof: !config.isWaterproof })}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
+                config.isWaterproof
+                  ? 'border-blue-500 bg-blue-50 text-blue-700'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Shield className={`h-4 w-4 ${config.isWaterproof ? 'text-blue-600' : 'text-gray-400'}`} />
+              <span className="font-medium">Wasserdicht</span>
+              {config.isWaterproof && <span className="text-xs bg-blue-100 px-2 py-0.5 rounded">+25%</span>}
+            </button>
+
+            <button
+              onClick={() => handleConfigChange({ hasUvPrint: !config.hasUvPrint })}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
+                config.hasUvPrint
+                  ? 'border-purple-500 bg-purple-50 text-purple-700'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Palette className={`h-4 w-4 ${config.hasUvPrint ? 'text-purple-600' : 'text-gray-400'}`} />
+              <span className="font-medium">UV-Druck</span>
+              {config.hasUvPrint && <span className="text-xs bg-purple-100 px-2 py-0.5 rounded">Empfohlen</span>}
+            </button>
+
+            <button
+              onClick={() => handleConfigChange({ hasHangingSystem: !config.hasHangingSystem })}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
+                config.hasHangingSystem
+                  ? 'border-gray-500 bg-gray-50 text-gray-700'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <svg className={`h-4 w-4 ${config.hasHangingSystem ? 'text-gray-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              <span className="font-medium">Hängesystem</span>
+              {config.hasHangingSystem && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">Optional</span>}
+            </button>
+
+            <button
+              onClick={() => handleConfigChange({ expressProduction: !config.expressProduction })}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg border-2 transition-all duration-300 ${
+                config.expressProduction
+                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Zap className={`h-4 w-4 ${config.expressProduction ? 'text-orange-600' : 'text-gray-400'}`} />
+              <span className="font-medium">Express</span>
+              {config.expressProduction && <span className="text-xs bg-orange-100 px-2 py-0.5 rounded">+30%</span>}
+            </button>
           </div>
         </div>
       </main>
