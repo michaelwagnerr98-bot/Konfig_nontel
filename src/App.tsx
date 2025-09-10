@@ -172,9 +172,6 @@ function HomePage() {
             </div>
 
             {/* Vollbild hint */}
-            <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-3 py-1 rounded-lg text-sm backdrop-blur-sm">
-              💡 Vollbild für Details
-            </div>
 
             <NeonMockupStage
               lengthCm={Math.max(config.customWidth, config.calculatedHeight)}
