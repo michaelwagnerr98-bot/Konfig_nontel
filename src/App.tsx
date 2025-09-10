@@ -423,6 +423,15 @@ function HomePage() {
               <Shield className={`h-4 w-4 ${config.isWaterproof ? 'text-blue-600' : 'text-gray-400'}`} />
               <span className="font-medium">Wasserdicht</span>
               {config.isWaterproof && <span className="text-xs bg-blue-100 px-2 py-0.5 rounded">+25%</span>}
+              <div className="relative group">
+                <svg className="h-3 w-3 text-gray-400 hover:text-blue-600 cursor-help transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
+                  IP65 Schutzklasse für Außenbereiche. Schützt vor Regen und Feuchtigkeit.
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                </div>
+              </div>
             </button>
 
             <button
@@ -436,6 +445,15 @@ function HomePage() {
               <Palette className={`h-4 w-4 ${config.hasUvPrint ? 'text-purple-600' : 'text-gray-400'}`} />
               <span className="font-medium">UV-Druck</span>
               {config.hasUvPrint && <span className="text-xs bg-purple-100 px-2 py-0.5 rounded">Empfohlen</span>}
+              <div className="relative group">
+                <svg className="h-3 w-3 text-gray-400 hover:text-purple-600 cursor-help transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
+                  Hochwertige UV-beständige Farben für langanhaltende Brillanz und Farbstabilität.
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                </div>
+              </div>
             </button>
 
             <button
@@ -451,6 +469,15 @@ function HomePage() {
               </svg>
               <span className="font-medium">Hängesystem</span>
               {config.hasHangingSystem && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">Optional</span>}
+              <div className="relative group">
+                <svg className="h-3 w-3 text-gray-400 hover:text-gray-600 cursor-help transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
+                  Professionelles Aufhängesystem mit Ketten und Befestigungsmaterial inklusive.
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                </div>
+              </div>
             </button>
 
             <button
@@ -464,6 +491,15 @@ function HomePage() {
               <Zap className={`h-4 w-4 ${config.expressProduction ? 'text-orange-600' : 'text-gray-400'}`} />
               <span className="font-medium">Express</span>
               {config.expressProduction && <span className="text-xs bg-orange-100 px-2 py-0.5 rounded">+30%</span>}
+              <div className="relative group">
+                <svg className="h-3 w-3 text-gray-400 hover:text-orange-600 cursor-help transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
+                  Verkürzte Produktionszeit: 4-6 Tage statt 2-3 Wochen Standard-Lieferzeit.
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
+                </div>
+              </div>
             </button>
           </div>
         </div>
