@@ -25,6 +25,7 @@ function App() {
 // HomePage component
 function HomePage() {
   const [designs, setDesigns] = useState<NeonDesign[]>([]);
+  const [currentView, setCurrentView] = useState('design');
   
   // Configuration state
   const [config, setConfig] = useState<ConfigurationState>({
@@ -146,7 +147,7 @@ function HomePage() {
       {/* Header - Responsive design */}
       <header className="bg-white shadow-sm border-b relative">
         {currentView === 'design' && (
-          <>
+          <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {/* Main Grid - Responsive layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
           {/* Left Column - Configuration */}
@@ -221,6 +222,8 @@ function HomePage() {
           </div>
         </div>
       </main>
+        )}
+      </header>
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white mt-16">
