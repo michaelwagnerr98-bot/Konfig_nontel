@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate, Link } from 'react-router-dom';
 import { Zap, Shield, Calculator, Plus, Truck, Ruler, Palette } from 'lucide-react';
 import ConfigurationPanel from './components/ConfigurationPanel';
 import PricingPage from './components/PricingPage';
 import NeonMockupStage from './components/NeonMockupStage';
 import MondayStatus from './components/MondayStatus';
+import AgbPage from './components/legal/AgbPage';
+import DatenschutzPage from './components/legal/DatenschutzPage';
+import ImpressumPage from './components/legal/ImpressumPage';
+import WiderrufsrechtPage from './components/legal/WiderrufsrechtPage';
+import ZahlungVersandPage from './components/legal/ZahlungVersandPage';
 import { ConfigurationState, NeonDesign, SignConfiguration, ShippingOption } from './types/configurator';
 import { calculateProportionalHeight, calculateProportionalLedLength, calculateSingleSignPrice } from './utils/calculations';
 import { getAvailableDesigns } from './data/mockDesigns';
@@ -16,6 +21,11 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/agb" element={<AgbPage />} />
+        <Route path="/datenschutz" element={<DatenschutzPage />} />
+        <Route path="/impressum" element={<ImpressumPage />} />
+        <Route path="/widerrufsrecht" element={<WiderrufsrechtPage />} />
+        <Route path="/zahlung-versand" element={<ZahlungVersandPage />} />
       </Routes>
     </Router>
   );
@@ -463,7 +473,20 @@ function HomePage() {
       <footer className="bg-gray-800 text-white mt-16">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
-            <p className="text-gray-400 text-sm">
+            {/* Legal Links */}
+            <div className="flex flex-wrap items-center justify-center space-x-1 text-sm text-gray-400 mb-4">
+              <a href="/widerrufsrecht" className="hover:text-white transition-colors">Widerrufsrecht</a>
+              <span>•</span>
+              <a href="/datenschutz" className="hover:text-white transition-colors">Datenschutzerklärung</a>
+              <span>•</span>
+              <a href="/agb" className="hover:text-white transition-colors">AGB</a>
+              <span>•</span>
+              <a href="/zahlung-versand" className="hover:text-white transition-colors">Zahlung und Versand</a>
+              <span>•</span>
+              <a href="/impressum" className="hover:text-white transition-colors">Impressum</a>
+            </div>
+            
+            <p className="text-gray-400 text-sm mb-2">
               © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
             </p>
             <MondayStatus />
