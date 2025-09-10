@@ -473,6 +473,10 @@ function HomePage() {
       <footer className="bg-gray-800 text-white">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
+            <p className="text-gray-400 text-sm mb-4">
+              © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
+            </p>
+            
             {/* Legal Links */}
             <div className="flex flex-wrap items-center justify-center space-x-1 text-sm text-gray-400 mb-4">
               <a href="/widerrufsrecht" className="hover:text-white transition-colors">Widerrufsrecht</a>
@@ -486,9 +490,6 @@ function HomePage() {
               <a href="/impressum" className="hover:text-white transition-colors">Impressum</a>
             </div>
             
-            <p className="text-gray-400 text-sm mb-2">
-              © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
-            </p>
             <MondayStatus />
           </div>
         </div>
