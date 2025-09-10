@@ -319,7 +319,28 @@ function HomePage() {
               </button>
 
               <button
-                onClick={() => navigate('/pricing')}
+                onClick={() => {
+                  // Navigiere zur Pricing-Seite mit der aktuellen Konfiguration
+                  // Da React Router keine komplexen State-Übertragungen unterstützt,
+                  // speichern wir die Konfiguration im localStorage
+                  const configToSave = {
+                    selectedDesign: config.selectedDesign,
+                    customWidth: config.customWidth,
+                    calculatedHeight: config.calculatedHeight,
+                    isWaterproof: config.isWaterproof,
+                    isTwoPart: config.isTwoPart,
+                    hasUvPrint: config.hasUvPrint,
+                    hasHangingSystem: config.hasHangingSystem,
+                    includesInstallation: config.includesInstallation,
+                    expressProduction: config.expressProduction,
+                    customerPostalCode: config.customerPostalCode,
+                    selectedShipping: config.selectedShipping,
+                    signs: config.signs || [],
+                  };
+                  
+                  localStorage.setItem('neon-configurator-state', JSON.stringify(configToSave));
+                  navigate('/pricing');
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
               >
                 <Truck className="h-5 w-5" />

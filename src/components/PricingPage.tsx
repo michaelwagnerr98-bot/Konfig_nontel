@@ -44,10 +44,33 @@ const PricingPage: React.FC = () => {
   useEffect(() => {
     const loadDesigns = async () => {
       try {
+        // Lade gespeicherte Konfiguration aus localStorage
+        const savedConfigStr = localStorage.getItem('neon-configurator-state');
+        let savedConfig = null;
+        
+        if (savedConfigStr) {
+          try {
+            savedConfig = JSON.parse(savedConfigStr);
+            console.log('📦 Gespeicherte Konfiguration geladen:', savedConfig);
+          } catch (e) {
+            console.warn('Fehler beim Laden der gespeicherten Konfiguration:', e);
+          }
+        }
+        
         const availableDesigns = await getAvailableDesigns();
         setDesigns(availableDesigns);
         
-        if (availableDesigns.length > 0) {
+        if (savedConfig) {
+          // Verwende gespeicherte Konfiguration
+          setConfig(prev => ({
+            ...prev,
+            ...savedConfig,
+            // Stelle sicher, dass das Design in der verfügbaren Liste ist
+            selectedDesign: availableDesigns.find(d => d.id === savedConfig.selectedDesign?.id) || availableDesigns[0] || prev.selectedDesign,
+          }));
+          console.log('✅ Konfiguration aus localStorage wiederhergestellt');
+        } else if (availableDesigns.length > 0) {
+          // Fallback zur Standard-Konfiguration
           const firstDesign = availableDesigns[0];
           const initialHeight = calculateProportionalHeight(
             firstDesign.originalWidth,
