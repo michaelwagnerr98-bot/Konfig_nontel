@@ -22,13 +22,13 @@ const MondayStatus: React.FC = () => {
 
     initSync();
 
-    // Start auto-sync every 30 seconds
-    mondayService.startAutoSync(30);
+    // Start auto-sync every 24 hours (86400 seconds)
+    mondayService.startAutoSync(86400);
     
-    // Update status every 5 seconds
+    // Update status every 30 seconds
     const statusInterval = setInterval(() => {
       setStatus(mondayService.getStatus());
-    }, 5000);
+    }, 30000);
 
     return () => {
       clearInterval(statusInterval);

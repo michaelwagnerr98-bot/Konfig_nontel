@@ -909,22 +909,22 @@ class MondayService {
   }
 
   // Auto-sync management
-  startAutoSync(intervalSeconds: number = 30): void {
+  startAutoSync(intervalSeconds: number = 86400): void {
     if (this.syncInterval) {
       clearInterval(this.syncInterval);
     }
 
     this.syncInterval = setInterval(async () => {
       try {
-        console.log('🔄 Auto-Sync gestartet um:', new Date().toLocaleTimeString());
+        console.log('🔄 24h Auto-Sync gestartet um:', new Date().toLocaleString());
         await this.fetchPrices();
-        console.log('🔄 Auto-Sync erfolgreich:', new Date().toLocaleTimeString());
+        console.log('🔄 24h Auto-Sync erfolgreich:', new Date().toLocaleString());
       } catch (error) {
-        console.error('🔄 Auto-Sync Fehler:', error);
+        console.error('🔄 24h Auto-Sync Fehler:', error);
       }
     }, intervalSeconds * 1000);
 
-    console.log(`🚀 Auto-Sync gestartet (alle ${intervalSeconds} Sekunden)`);
+    console.log(`🚀 24h Auto-Sync gestartet (alle ${Math.round(intervalSeconds / 3600)} Stunden)`);
   }
 
   stopAutoSync(): void {
