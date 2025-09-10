@@ -33,13 +33,13 @@
 
 .slider::-webkit-slider-track {
   background: #d1d5db; /* Gray-300 */
-  height: 2px;
+  height: 1px;
   border-radius: 3px;
 }
 
 .slider::-moz-range-track {
   background: #d1d5db; /* Gray-300 */
-  height: 2px;
+  height: 1px;
   border-radius: 3px;
   border: none;
 }
