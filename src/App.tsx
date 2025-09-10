@@ -489,14 +489,10 @@ function HomePage() {
             <p className="text-gray-400 text-sm mb-2">
               © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
             </p>
+            <MondayStatus />
           </div>
         </div>
       </footer>
-      
-      {/* Sync Status - Absolute Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-2">
-        <MondayStatus />
-      </div>
     </div>
   );
 }
