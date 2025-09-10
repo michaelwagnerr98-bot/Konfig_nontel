@@ -795,7 +795,6 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
           title="Vollbild-Ansicht öffnen"
         >
           💡 Vollbild für Details
-        </div>
       )}
 
       {/* Optionen Panel */}

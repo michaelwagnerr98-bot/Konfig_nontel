@@ -325,10 +325,10 @@ function HomePage() {
                     setIsAddingToCart(false);
                   }, 1000);
                 }}
-                className={`font-bold px-4 sm:px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center justify-center space-x-2 relative overflow-hidden ${
+                className={`font-bold px-4 sm:px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center justify-center space-x-2 relative overflow-hidden hover:rotate-1 hover:scale-105 ${
                   isAddingToCart
                     ? 'bg-green-600 text-white scale-105'
-                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:scale-105 hover:rotate-1'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white'
                 }`}
               >
                 {isAddingToCart ? (
@@ -372,10 +372,10 @@ function HomePage() {
                   localStorage.setItem('neon-configurator-state', JSON.stringify(configToSave));
                   navigate('/pricing');
                 }}
-                className={`font-bold px-4 sm:px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center justify-center space-x-2 relative ${
+                className={`font-bold px-4 sm:px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center justify-center space-x-2 relative hover:-rotate-1 hover:scale-105 ${
                   cartItemCount > 0
-                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white hover:scale-105 hover:-rotate-1'
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105 hover:-rotate-1'
+                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
                 }`}
               >
                 <Truck className="h-5 w-5" />
@@ -392,7 +392,7 @@ function HomePage() {
           </div>
 
           {/* Size Configuration - Compact horizontal layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 gap-6">
             {/* Width */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -453,8 +453,7 @@ function HomePage() {
               />
               <div className="flex justify-between text-xs text-gray-500 mt-2">
                 <span>30cm</span>
-                <span className="hidden sm:inline">3m</span>
-                <span className="sm:hidden">300cm</span>
+                <span>3m</span>
               </div>
             </div>
 

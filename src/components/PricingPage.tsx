@@ -258,37 +258,37 @@ const PricingPage: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Cart Items */}
-          <div className="w-full lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* Current Design Display */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Aktuelles Design</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Aktuelles Design</h2>
               
               <div className="border border-green-200 bg-green-50 rounded-lg p-4">
-                <div className="flex flex-col sm:flex-row items-start space-y-3 sm:space-y-0 sm:space-x-4">
+                <div className="flex items-start space-x-4">
                   <SVGPreview 
                     design={config.selectedDesign}
                     width={config.customWidth}
                     height={config.calculatedHeight}
-                    className="w-16 h-16 sm:w-20 sm:h-20 mx-auto sm:mx-0"
+                    className="w-20 h-20"
                   />
                   
                   <div className="flex-1">
-                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 space-y-2 sm:space-y-0">
+                    <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h3 className="font-semibold text-gray-800 text-center sm:text-left">{config.selectedDesign.name}</h3>
+                        <h3 className="font-semibold text-gray-800">{config.selectedDesign.name}</h3>
                         <p className="text-sm text-gray-600">
                           {config.customWidth}×{config.calculatedHeight}cm
                         </p>
                       </div>
-                      <div className="text-center sm:text-right">
-                        <div className="text-lg sm:text-xl font-bold text-gray-800">€{currentDesignPrice.toFixed(2)}</div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold text-gray-800">€{currentDesignPrice.toFixed(2)}</div>
                         <div className="text-sm text-gray-500">pro Stück</div>
                       </div>
                     </div>
                     
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mb-3">
+                    <div className="flex flex-wrap items-center gap-2 mb-3">
                       {config.isWaterproof && (
                         <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
                           Wasserdicht (IP65)
@@ -307,10 +307,10 @@ const PricingPage: React.FC = () => {
                     </div>
 
                     {/* Quick Configuration Options */}
-                    <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-3">
+                    <div className="flex flex-wrap gap-2 mt-3">
                       <button
                         onClick={() => handleConfigChange({ isWaterproof: !config.isWaterproof })}
-                        className={`flex items-center space-x-1 px-2 sm:px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                        className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${
                           config.isWaterproof
                             ? 'bg-blue-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -322,7 +322,7 @@ const PricingPage: React.FC = () => {
                       
                       <button
                         onClick={() => handleConfigChange({ hasUvPrint: !config.hasUvPrint })}
-                        className={`flex items-center space-x-1 px-2 sm:px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                        className={`flex items-center space-x-1 px-3 py-1 rounded-md text-xs font-medium transition-all ${
                           config.hasUvPrint
                             ? 'bg-purple-500 text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -339,7 +339,7 @@ const PricingPage: React.FC = () => {
 
             {/* Shipping Options */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Versandoptionen</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Versandoptionen</h2>
               
               {/* Pickup Option */}
               <div className={`flex items-center space-x-3 p-4 border-2 rounded-lg transition-all duration-300 cursor-pointer mb-4 ${
@@ -389,7 +389,7 @@ const PricingPage: React.FC = () => {
                 
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-gray-800 text-sm sm:text-base">Selbstabholung (Empfohlen)</h4>
+                    <h4 className="font-medium text-gray-800">Selbstabholung (Empfohlen)</h4>
                     <span className="font-bold text-green-600">Kostenlos</span>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">Kostenlose Abholung in 67433 Neustadt</p>
@@ -433,35 +433,35 @@ const PricingPage: React.FC = () => {
           </div>
 
           {/* Right Column - Summary & Checkout */}
-          <div className="w-full lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:sticky lg:top-6">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Bestellübersicht</h2>
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Bestellübersicht</h2>
               
               {/* Price Summary */}
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-sm sm:text-base text-gray-700">
+                <div className="flex justify-between text-gray-700">
                   <span>Aktuelles Design:</span>
                   <span className="font-semibold">€{currentDesignPrice.toFixed(2)}</span>
                 </div>
                 
                 {additionalCosts > 0 && (
-                  <div className="flex justify-between text-sm sm:text-base text-gray-700">
+                  <div className="flex justify-between text-gray-700">
                     <span>Zusatzkosten:</span>
                     <span className="font-semibold">€{additionalCosts.toFixed(2)}</span>
                   </div>
                 )}
                 
-                <div className="flex justify-between text-sm sm:text-base text-gray-700 border-t pt-3">
+                <div className="flex justify-between text-gray-700 border-t pt-3">
                   <span>Zwischensumme:</span>
                   <span className="font-semibold">€{subtotal.toFixed(2)}</span>
                 </div>
                 
-                <div className="flex justify-between text-sm sm:text-base text-gray-700">
+                <div className="flex justify-between text-gray-700">
                   <span>MwSt. (19%):</span>
                   <span className="font-semibold">€{tax.toFixed(2)}</span>
                 </div>
                 
-                <div className="flex justify-between text-lg sm:text-xl font-bold text-gray-800 border-t pt-3">
+                <div className="flex justify-between text-xl font-bold text-gray-800 border-t pt-3">
                   <span>Gesamtpreis:</span>
                   <span className="text-green-600">€{gesamtpreis.toFixed(2)}</span>
                 </div>
@@ -470,7 +470,7 @@ const PricingPage: React.FC = () => {
               {/* Checkout Buttons */}
               <div className="space-y-3">
                 {/* Checkbox-Bestätigung */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4 mb-4">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
                   <label className="flex items-start space-x-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -478,7 +478,7 @@ const PricingPage: React.FC = () => {
                       onChange={(e) => setIsConfirmed(e.target.checked)}
                       className="w-5 h-5 text-green-600 focus:ring-green-500 rounded mt-0.5 flex-shrink-0"
                     />
-                    <span className="text-xs sm:text-sm text-gray-800 leading-relaxed">
+                    <span className="text-sm text-gray-800 leading-relaxed">
                       <strong>Ich habe das Design geprüft und bestätige, dass es meinen Vorgaben entspricht.
                       Nach meiner Bestellung sind keine Änderungen oder ein Widerruf möglich.</strong>
                     </span>
@@ -488,7 +488,7 @@ const PricingPage: React.FC = () => {
                 <button 
                   onClick={handleStripeCheckout}
                   disabled={isProcessingPayment || !isConfirmed}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 sm:py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 sm:space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
                   <CreditCard className="h-5 w-5" />
                   <span>
@@ -500,11 +500,11 @@ const PricingPage: React.FC = () => {
               </div>
 
               {/* Payment Methods */}
-              <div className="mt-4 sm:mt-6 bg-gray-50 rounded-lg p-2 sm:p-3 border">
+              <div className="mt-6 bg-gray-50 rounded-lg p-3 border">
                 <div className="flex items-center justify-center space-x-2 mb-2">
                   <span className="text-xs text-gray-600">Sichere Zahlung:</span>
                 </div>
-                <div className="flex items-center justify-center space-x-1 sm:space-x-2 flex-wrap gap-1">
+                <div className="flex items-center justify-center space-x-2 flex-wrap gap-1">
                   <div className="bg-white rounded px-2 py-1 shadow-sm border flex items-center">
                     <div className="w-6 h-3 bg-blue-600 rounded-sm flex items-center justify-center">
                       <span className="text-white text-xs font-bold">V</span>
@@ -534,7 +534,7 @@ const PricingPage: React.FC = () => {
                 </div>
               </div>
 
-              <p className="text-xs text-gray-500 text-center mt-3 sm:mt-4">
+              <p className="text-xs text-gray-500 text-center mt-4">
                 Powered by Stripe • 14 Tage Widerrufsrecht • Käuferschutz
               </p>
             </div>
@@ -545,10 +545,10 @@ const PricingPage: React.FC = () => {
       {/* Postal Code Input Modal */}
       {showPostalCodeInput && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex items-center space-x-2 mb-4">
               <MapPin className="h-5 w-5 text-blue-600" />
-              <h3 className="text-base sm:text-lg font-semibold text-gray-800">Postleitzahl eingeben</h3>
+              <h3 className="text-lg font-semibold text-gray-800">Postleitzahl eingeben</h3>
             </div>
             
             <p className="text-sm text-gray-600 mb-4">
@@ -569,11 +569,11 @@ const PricingPage: React.FC = () => {
               }}
             />
             
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            <div className="flex space-x-3">
               <button
                 onClick={handlePostalCodeSubmit}
                 disabled={!tempPostalCode || !/^\d{5}$/.test(tempPostalCode)}
-                className="w-full sm:flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Berechnen
               </button>
@@ -582,7 +582,7 @@ const PricingPage: React.FC = () => {
                   setShowPostalCodeInput(false);
                   setTempPostalCode('');
                 }}
-                className="w-full sm:flex-1 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                className="flex-1 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
               >
                 Abbrechen
               </button>
