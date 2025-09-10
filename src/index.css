@@ -28,17 +28,17 @@
 
 /* Custom slider styles for all screen sizes */
 .slider {
-  background: #d1d5db; /* Gray-300 */
+  background: #ffffff; /* White */
 }
 
 .slider::-webkit-slider-track {
-  background: #d1d5db; /* Gray-300 */
+  background: #ffffff; /* White */
   height: 2px;
   border-radius: 3px;
 }
 
 .slider::-moz-range-track {
-  background: #d1d5db; /* Gray-300 */
+  background: #ffffff; /* White */
   height: 2px;
   border-radius: 3px;
   border: none;
