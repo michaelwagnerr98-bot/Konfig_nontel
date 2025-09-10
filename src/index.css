@@ -214,6 +214,11 @@ button:hover {
 .button-hover-effect {
   position: relative;
   overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.button-hover-effect:hover {
+  transform: rotate(1deg) scale(1.05);
 }
 
 .button-hover-effect::before {
@@ -229,4 +234,15 @@ button:hover {
 
 .button-hover-effect:hover::before {
   left: 100%;
+}
+
+/* Elegant rotation animations */
+@keyframes gentle-rotate-right {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(1deg) scale(1.05); }
+}
+
+@keyframes gentle-rotate-left {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(-1deg) scale(1.05); }
 }

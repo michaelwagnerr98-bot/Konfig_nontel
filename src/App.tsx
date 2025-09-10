@@ -328,7 +328,7 @@ function HomePage() {
                 className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative overflow-hidden ${
                   isAddingToCart
                     ? 'bg-green-600 text-white scale-105'
-                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:scale-105'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:scale-105 hover:rotate-1'
                 }`}
               >
                 {isAddingToCart ? (
@@ -374,8 +374,8 @@ function HomePage() {
                 }}
                 className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative ${
                   cartItemCount > 0
-                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white hover:scale-105'
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105'
+                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white hover:scale-105 hover:-rotate-1'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105 hover:-rotate-1'
                 }`}
               >
                 <Truck className="h-5 w-5" />
