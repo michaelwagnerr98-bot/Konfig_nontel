@@ -487,6 +487,8 @@ function HomePage() {
               <span>•</span>
               <a href="/widerrufsrecht" className="hover:text-blue-400 transition-colors px-1">Widerruf</a>
               <span>•</span>
+              <a href="/zahlung-versand" className="hover:text-blue-400 transition-colors px-1">Zahlung & Versand</a>
+              <span>•</span>
               <a href="/impressum" className="hover:text-blue-400 transition-colors px-1">Impressum</a>
             </div>
             
