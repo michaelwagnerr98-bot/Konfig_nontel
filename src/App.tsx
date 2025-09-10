@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import { Zap, Palette, Calculator, ShoppingCart } from 'lucide-react';
 import DesignSelector from './components/DesignSelector';
 import ConfigurationPanel from './components/ConfigurationPanel';
@@ -26,6 +26,7 @@ function App() {
 
 // HomePage component
 function HomePage() {
+  const navigate = useNavigate();
   const [designs, setDesigns] = useState<NeonDesign[]>([]);
   const [currentView, setCurrentView] = useState('design');
   
