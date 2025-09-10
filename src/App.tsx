@@ -103,7 +103,7 @@ function HomePage() {
       <main className="px-4 pb-8">
         {/* Mockup Stage - Full Width */}
         <div className="mb-6">
-          <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl" style={{ height: '500px' }}>
+          <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl" style={{ height: '600px' }}>
             {/* Yellow bulb icon */}
             <div className="absolute top-4 left-4 z-10 bg-yellow-500 rounded-full p-3 shadow-lg">
               <div className="w-6 h-6 bg-yellow-600 rounded-full flex items-center justify-center">
