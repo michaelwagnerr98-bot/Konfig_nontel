@@ -97,6 +97,8 @@ function HomePage() {
     config.expressProduction || false
   );
 
+  return (
+    <div className="min-h-screen bg-gray-50">
       {/* Main Content */}
       <main className="px-4 pb-8">
         {/* Mockup Stage - Full Width */}
