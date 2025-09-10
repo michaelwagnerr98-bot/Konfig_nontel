@@ -411,7 +411,7 @@ const PricingPage: React.FC = () => {
                       </p>
                       <button
                         onClick={() => setShowPostalCodeInput(true)}
-                        className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                       >
                         Postleitzahl eingeben
                       </button>

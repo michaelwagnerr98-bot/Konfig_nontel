@@ -120,7 +120,7 @@ function HomePage() {
       <main className="px-4 pb-8">
         {/* Mockup Stage - Full Width */}
         <div className="mb-6">
-          <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]">
+          <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl" style={{ height: '600px' }}>
             {/* Yellow bulb icon */}
             <div className="absolute top-4 left-4 z-10 bg-yellow-500 rounded-full p-3 shadow-lg">
               <div className="w-6 h-6 bg-yellow-600 rounded-full flex items-center justify-center">
@@ -146,9 +146,9 @@ function HomePage() {
                   });
                 }
               }}
-              className="absolute left-2 sm:left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -170,15 +170,15 @@ function HomePage() {
                   });
                 }
               }}
-              className="absolute right-2 sm:right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-2 sm:p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
             {/* Design indicators */}
-            <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1 sm:space-x-2 z-10">
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
               {designs.map((design, index) => {
                 const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
                 return (
@@ -195,7 +195,7 @@ function HomePage() {
                         calculatedHeight: newHeight,
                       });
                     }}
-                    className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-125 ${
+                    className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 ${
                       index === currentIndex
                         ? 'bg-white shadow-lg shadow-white/50'
                         : 'bg-white/40 hover:bg-white/60'
@@ -220,15 +220,15 @@ function HomePage() {
         </div>
 
         {/* Technical Data Bar */}
-        <div className="bg-gray-200 rounded-lg shadow-sm p-3 sm:p-4 -mt-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
+        <div className="bg-gray-200 rounded-lg shadow-sm p-4 -mt-4">
+          <div className="flex items-center justify-between">
             {/* Left side - Technical Data */}
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
+            <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-sm font-medium text-gray-700">Technische Daten</span>
               </div>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
+              <div className="flex items-center space-x-4 text-sm">
                 <div>
                   <span className="text-gray-600">Elemente: </span>
                   <span className="font-bold text-green-600">{config.selectedDesign.elements}</span>
@@ -261,12 +261,12 @@ function HomePage() {
             </div>
 
             {/* Right side - Original Data */}
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
+            <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <span className="text-sm font-medium text-gray-700">Originale Daten</span>
               </div>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm">
+              <div className="flex items-center space-x-4 text-sm">
                 <div>
                   <span className="text-gray-600">Breite: </span>
                   <span className="font-bold text-blue-600">{config.selectedDesign.originalWidth}cm</span>
@@ -288,17 +288,17 @@ function HomePage() {
         <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
           <div className="flex items-center justify-between mb-6">
             {/* Left side - Title and Options */}
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
+            <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-3">
                 <div className="bg-purple-600 rounded-lg p-2">
                   <Ruler className="h-6 w-6 text-white" />
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-gray-800">Konfiguration</h2>
+                <h2 className="text-xl font-bold text-gray-800">Konfiguration</h2>
               </div>
             </div>
             
             {/* Right side - Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto mt-4 sm:mt-0">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => {
                   setIsAddingToCart(true);
@@ -325,10 +325,10 @@ function HomePage() {
                     setIsAddingToCart(false);
                   }, 1000);
                 }}
-                className={`font-bold px-4 sm:px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center justify-center space-x-2 relative overflow-hidden hover:rotate-1 hover:scale-105 ${
+                className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative overflow-hidden ${
                   isAddingToCart
                     ? 'bg-green-600 text-white scale-105'
-                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:scale-105 hover:rotate-1'
                 }`}
               >
                 {isAddingToCart ? (
@@ -372,10 +372,10 @@ function HomePage() {
                   localStorage.setItem('neon-configurator-state', JSON.stringify(configToSave));
                   navigate('/pricing');
                 }}
-                className={`font-bold px-4 sm:px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center justify-center space-x-2 relative hover:-rotate-1 hover:scale-105 ${
+                className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative ${
                   cartItemCount > 0
-                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white'
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white'
+                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white hover:scale-105 hover:-rotate-1'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105 hover:-rotate-1'
                 }`}
               >
                 <Truck className="h-5 w-5" />
@@ -383,7 +383,7 @@ function HomePage() {
                 
                 {/* Simple Cart Badge */}
                 {cartItemCount > 0 && (
-                  <div className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-red-500 text-white text-xs sm:text-sm font-bold rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center shadow-lg border-2 border-white">
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-sm font-bold rounded-full h-6 w-6 flex items-center justify-center shadow-lg border-2 border-white">
                     {cartItemCount}
                   </div>
                 )}
@@ -473,23 +473,23 @@ function HomePage() {
           </div>
 
           {/* Option Buttons - Below width/height section */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-6">
+          <div className="grid grid-cols-4 gap-3 mt-6">
             <button
               onClick={() => handleConfigChange({ isWaterproof: !config.isWaterproof })}
-              className={`flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 px-2 sm:px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
+              className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
                 config.isWaterproof
                   ? 'border-blue-500 bg-blue-50 text-blue-700'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
               }`}
             >
               <Shield className={`h-4 w-4 ${config.isWaterproof ? 'text-blue-600' : 'text-gray-400'}`} />
-              <span className="font-medium text-xs sm:text-sm text-center">Wasserdicht</span>
+              <span className="font-medium">Wasserdicht</span>
               {config.isWaterproof && <span className="text-xs bg-blue-100 px-2 py-0.5 rounded">+25%</span>}
               <div className="relative group">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
+                <div className="w-4 h-4 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
                   <span className="text-blue-600 text-xs font-bold">?</span>
                 </div>
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-40 sm:w-48 text-center">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
                   IP65 Schutzklasse für Außenbereiche. Schützt vor Regen und Feuchtigkeit.
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                 </div>
@@ -498,20 +498,20 @@ function HomePage() {
 
             <button
               onClick={() => handleConfigChange({ hasUvPrint: !config.hasUvPrint })}
-              className={`flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 px-2 sm:px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
+              className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
                 config.hasUvPrint
                   ? 'border-purple-500 bg-purple-50 text-purple-700'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
               }`}
             >
               <Palette className={`h-4 w-4 ${config.hasUvPrint ? 'text-purple-600' : 'text-gray-400'}`} />
-              <span className="font-medium text-xs sm:text-sm text-center">UV-Druck</span>
+              <span className="font-medium">UV-Druck</span>
               {config.hasUvPrint && <span className="text-xs bg-purple-100 px-2 py-0.5 rounded">Empfohlen</span>}
               <div className="relative group">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
+                <div className="w-4 h-4 bg-purple-100 hover:bg-purple-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
                   <span className="text-purple-600 text-xs font-bold">?</span>
                 </div>
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-40 sm:w-48 text-center">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
                   Hochwertige UV-beständige Farben für langanhaltende Brillanz und Farbstabilität.
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                 </div>
@@ -520,7 +520,7 @@ function HomePage() {
 
             <button
               onClick={() => handleConfigChange({ hasHangingSystem: !config.hasHangingSystem })}
-              className={`flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 px-2 sm:px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
+              className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
                 config.hasHangingSystem
                   ? 'border-gray-500 bg-gray-50 text-gray-700'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
@@ -529,13 +529,13 @@ function HomePage() {
               <svg className={`h-4 w-4 ${config.hasHangingSystem ? 'text-gray-600' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
-              <span className="font-medium text-xs sm:text-sm text-center">Hängesystem</span>
+              <span className="font-medium">Hängesystem</span>
               {config.hasHangingSystem && <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">Optional</span>}
               <div className="relative group">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
+                <div className="w-4 h-4 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
                   <span className="text-gray-600 text-xs font-bold">?</span>
                 </div>
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-40 sm:w-48 text-center">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
                   Professionelles Aufhängesystem mit Ketten und Befestigungsmaterial inklusive.
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                 </div>
@@ -544,20 +544,20 @@ function HomePage() {
 
             <button
               onClick={() => handleConfigChange({ expressProduction: !config.expressProduction })}
-              className={`flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 px-2 sm:px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
+              className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-lg border-2 transition-all duration-300 ${
                 config.expressProduction
                   ? 'border-orange-500 bg-orange-50 text-orange-700'
                   : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
               }`}
             >
               <Zap className={`h-4 w-4 ${config.expressProduction ? 'text-orange-600' : 'text-gray-400'}`} />
-              <span className="font-medium text-xs sm:text-sm text-center">Express</span>
+              <span className="font-medium">Express</span>
               {config.expressProduction && <span className="text-xs bg-orange-100 px-2 py-0.5 rounded">+30%</span>}
               <div className="relative group">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-orange-100 hover:bg-orange-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
+                <div className="w-4 h-4 bg-orange-100 hover:bg-orange-200 rounded-full flex items-center justify-center cursor-help transition-colors group-hover:scale-110">
                   <span className="text-orange-600 text-xs font-bold">?</span>
                 </div>
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-40 sm:w-48 text-center">
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-50 w-48 text-center">
                   Verkürzte Produktionszeit: 4-6 Tage statt 2-3 Wochen Standard-Lieferzeit.
                   <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></div>
                 </div>
@@ -569,16 +569,16 @@ function HomePage() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:py-3">
+        <div className="max-w-7xl mx-auto px-4 py-3">
           {/* Ultra-kompakte einzeilige Anordnung */}
-          <div className="flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-2 lg:space-y-0 text-xs">
+          <div className="flex flex-col lg:flex-row items-center justify-between space-y-2 lg:space-y-0 text-xs">
             {/* Links: Copyright */}
             <div className="text-gray-400">
               © 2025 Nontel - Michael Wagner
             </div>
             
             {/* Mitte: Rechtliche Links */}
-            <div className="flex flex-wrap items-center justify-center gap-1 sm:space-x-1 text-gray-500">
+            <div className="flex items-center space-x-1 text-gray-500">
               <a href="/agb" className="hover:text-blue-400 transition-colors px-1">AGB</a>
               <span>•</span>
               <a href="/datenschutz" className="hover:text-blue-400 transition-colors px-1">Datenschutz</a>
@@ -591,7 +591,7 @@ function HomePage() {
             </div>
             
             {/* Rechts: Kontakt & Status */}
-            <div className="flex items-center justify-center space-x-3 text-gray-400">
+            <div className="flex items-center space-x-3 text-gray-400">
               <MondayStatus />
             </div>
           </div>

@@ -112,15 +112,6 @@ button:hover {
   filter: brightness(1.05);
 }
 
-/* Elegant rotation effects */
-.hover\:rotate-1:hover {
-  transform: rotate(1deg) scale(1.05);
-}
-
-.hover\:-rotate-1:hover {
-  transform: rotate(-1deg) scale(1.05);
-}
-
 /* Card hover effects for all screen sizes */
 .card-hover:hover {
   transform: translateY(-2px);
@@ -222,4 +213,36 @@ button:hover {
 /* Button hover effects */
 .button-hover-effect {
   position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.button-hover-effect:hover {
+  transform: rotate(1deg) scale(1.05);
+}
+
+.button-hover-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.button-hover-effect:hover::before {
+  left: 100%;
+}
+
+/* Elegant rotation animations */
+@keyframes gentle-rotate-right {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(1deg) scale(1.05); }
+}
+
+@keyframes gentle-rotate-left {
+  0% { transform: rotate(0deg) scale(1); }
+  100% { transform: rotate(-1deg) scale(1.05); }
 }
