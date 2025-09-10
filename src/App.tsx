@@ -323,20 +323,6 @@ function HomePage() {
       <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
         {currentView === 'design' && (
           <>
-            {/* Hero Section - Responsive */}
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-3xl md:text-5xl font-bold text-gray-800 mb-4 md:mb-6">
-                Ihr individuelles{' '}
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  Neon-Schild
-                </span>
-              </h2>
-              <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Konfigurieren Sie Ihr maßgeschneidertes LED-Neon-Schild mit unserem interaktiven Designer. 
-                Professionelle Qualität, faire Preise, schnelle Lieferung.
-              </p>
-            </div>
-
             {/* Main Grid - Responsive layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
               {/* Left Column - Design Selection */}
