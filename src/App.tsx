@@ -112,13 +112,49 @@ function HomePage() {
             </div>
 
             {/* Navigation arrows */}
-            <button className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10">
+            <button 
+              onClick={() => {
+                const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
+                const prevIndex = currentIndex > 0 ? currentIndex - 1 : designs.length - 1;
+                if (designs[prevIndex]) {
+                  const newDesign = designs[prevIndex];
+                  const newHeight = calculateProportionalHeight(
+                    newDesign.originalWidth,
+                    newDesign.originalHeight,
+                    config.customWidth
+                  );
+                  handleConfigChange({
+                    selectedDesign: newDesign,
+                    calculatedHeight: newHeight,
+                  });
+                }
+              }}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10"
+            >
               <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
-            <button className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10">
+            <button 
+              onClick={() => {
+                const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
+                const nextIndex = currentIndex < designs.length - 1 ? currentIndex + 1 : 0;
+                if (designs[nextIndex]) {
+                  const newDesign = designs[nextIndex];
+                  const newHeight = calculateProportionalHeight(
+                    newDesign.originalWidth,
+                    newDesign.originalHeight,
+                    config.customWidth
+                  );
+                  handleConfigChange({
+                    selectedDesign: newDesign,
+                    calculatedHeight: newHeight,
+                  });
+                }
+              }}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10"
+            >
               <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -126,11 +162,31 @@ function HomePage() {
 
             {/* Design indicators */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
-              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
-              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
-              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
+              {designs.map((design, index) => {
+                const currentIndex = designs.findIndex(d => d.id === config.selectedDesign.id);
+                return (
+                  <button
+                    key={design.id}
+                    onClick={() => {
+                      const newHeight = calculateProportionalHeight(
+                        design.originalWidth,
+                        design.originalHeight,
+                        config.customWidth
+                      );
+                      handleConfigChange({
+                        selectedDesign: design,
+                        calculatedHeight: newHeight,
+                      });
+                    }}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 hover:scale-125 ${
+                      index === currentIndex
+                        ? 'bg-white shadow-lg shadow-white/50'
+                        : 'bg-white/40 hover:bg-white/60'
+                    }`}
+                    title={design.name}
+                  />
+                );
+              })}
             </div>
 
             {/* Vollbild hint */}
