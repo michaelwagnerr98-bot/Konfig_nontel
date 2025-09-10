@@ -124,7 +124,7 @@ const ConfigurationPanel: React.FC<ConfigurationPanelProps> = ({
             <Scissors className="h-4 md:h-3 w-4 md:w-3 text-gray-500 flex-shrink-0" />
             <div className="flex items-center space-x-1">
               <span className="text-sm md:text-xs text-gray-600">
-                Mehrteilig (>300cm, +15%)
+                Mehrteilig (&gt;300cm, +15%)
               </span>
               <div className="relative group">
                 <Info className="h-4 md:h-3 w-4 md:w-3 text-gray-400 hover:text-blue-500 cursor-help transition-colors flex-shrink-0" />
