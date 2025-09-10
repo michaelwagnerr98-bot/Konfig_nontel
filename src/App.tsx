@@ -325,40 +325,44 @@ function HomePage() {
                     setIsAddingToCart(false);
                   }, 1000);
                 }}
-                className={`font-bold px-6 py-3 rounded-lg transition-all duration-500 transform shadow-lg flex items-center space-x-2 relative overflow-hidden ${
+                className={`font-bold px-6 py-3 rounded-lg transition-all duration-500 transform shadow-lg flex items-center space-x-2 relative overflow-hidden group ${
                   isAddingToCart
-                    ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 text-white scale-110 shadow-2xl rotate-1'
-                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:scale-105 hover:shadow-xl'
+                    ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 text-white scale-110 shadow-2xl rotate-2 animate-wiggle'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:scale-105 hover:shadow-xl hover:rotate-1'
                 }`}
               >
                 {isAddingToCart ? (
                   <>
-                    <div className="bg-white/30 rounded-full p-1 animate-spin">
+                    <div className="bg-white/30 rounded-full p-1 animate-bounce">
                       <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="animate-pulse">✨ Hinzugefügt!</span>
+                    <span className="animate-bounce">🎉 Hinzugefügt!</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+                    <Plus className="h-5 w-5 transition-transform group-hover:rotate-180 group-hover:scale-125" />
                     <span>Hinzufügen</span>
                   </>
                 )}
                 <span className="bg-white/20 px-2 py-1 rounded-full text-sm">€{currentDesignPrice.toFixed(2)}</span>
                 
-                {/* Glowing wave effect during animation */}
-                {isAddingToCart && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
-                )}
-                
-                {/* Success particles effect */}
+                {/* Ripple effect during animation */}
                 {isAddingToCart && (
                   <>
-                    <div className="absolute top-0 left-1/4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="absolute top-0 right-1/4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
-                    <div className="absolute bottom-0 left-1/3 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-ping"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-300/20 via-emerald-300/20 to-green-300/20 animate-pulse"></div>
+                  </>
+                )}
+                
+                {/* Floating particles effect */}
+                {isAddingToCart && (
+                  <>
+                    <div className="absolute top-1 left-1/4 w-2 h-2 bg-yellow-300 rounded-full animate-float" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="absolute top-1 right-1/4 w-1.5 h-1.5 bg-white rounded-full animate-float" style={{ animationDelay: '0.3s' }}></div>
+                    <div className="absolute bottom-1 left-1/3 w-1 h-1 bg-green-200 rounded-full animate-float" style={{ animationDelay: '0.5s' }}></div>
+                    <div className="absolute top-2 left-1/2 w-1 h-1 bg-emerald-200 rounded-full animate-float" style={{ animationDelay: '0.7s' }}></div>
                   </>
                 )}
               </button>
@@ -388,25 +392,33 @@ function HomePage() {
                 }}
                 className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative group overflow-hidden ${
                   cartItemCount > 0
-                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white hover:scale-105 animate-glow'
+                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white hover:scale-105 animate-glow hover:-rotate-1'
                     : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105'
                 }`}
               >
-                <Truck className={`h-5 w-5 transition-transform ${cartItemCount > 0 ? 'animate-bounce' : 'group-hover:translate-x-1'}`} />
+                <Truck className={`h-5 w-5 transition-transform duration-300 ${
+                  cartItemCount > 0 
+                    ? 'animate-bounce group-hover:animate-wiggle' 
+                    : 'group-hover:translate-x-2 group-hover:rotate-12'
+                }`} />
                 <span>Versand berechnen</span>
                 
-                {/* Animated Cart Badge with improved styling */}
+                {/* Enhanced Cart Badge with multiple effects */}
                 {cartItemCount > 0 && (
-                  <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-sm font-bold rounded-full h-7 w-7 flex items-center justify-center animate-bounce shadow-xl border-3 border-white transform scale-110">
+                  <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-sm font-bold rounded-full h-7 w-7 flex items-center justify-center animate-bounce shadow-xl border-2 border-white transform scale-110 hover:scale-125 transition-transform">
                     {cartItemCount}
-                    {/* Pulsing ring effect */}
+                    {/* Multiple pulsing ring effects */}
                     <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75"></div>
+                    <div className="absolute inset-0 rounded-full bg-pink-400 animate-ping opacity-50" style={{ animationDelay: '0.5s' }}></div>
                   </div>
                 )}
                 
-                {/* Flowing background effect when items in cart */}
+                {/* Enhanced flowing background effect */}
                 {cartItemCount > 0 && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                  <>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                    <div className="absolute inset-0 bg-gradient-to-l from-transparent via-purple-300/10 to-transparent animate-shimmer" style={{ animationDelay: '1s' }}></div>
+                  </>
                 )}
               </button>
             </div>
