@@ -216,27 +216,11 @@ function HomePage() {
 
           {/* Right Column - Pricing */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
-              <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-lg p-2">
-                  <Calculator className="h-5 md:h-6 w-5 md:w-6 text-white" />
-                </div>
-                <h2 className="text-lg md:text-xl font-bold text-gray-800">Preiskalkulation</h2>
-              </div>
-              
-              <div className="text-center py-8">
-                <ShoppingCart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-500 mb-4">Preise berechnen</h3>
-                <p className="text-gray-400 mb-6">Konfigurieren Sie Ihr Design und sehen Sie die Preise</p>
-                
-                <button
-                  onClick={() => window.location.href = '/pricing'}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                >
-                  Zur Preiskalkulation
-                </button>
-              </div>
-            </div>
+            <PricingCalculator
+              config={config}
+              onRemoveSign={handleRemoveSign}
+              onGoToCart={() => navigate('/pricing')}
+            />
           </div>
         </div>
       </main>
