@@ -593,7 +593,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       {/* Neon An/Aus Toggle - Floating Button */}
       {!showTechnicalView && (
         <div 
-          className="absolute top-4 left-4 z-10"
+          className="absolute top-2 sm:top-4 left-2 sm:left-4 z-10"
           onMouseEnter={showNeonSliderFor2Seconds}
           onMouseLeave={() => {
             // Clear timeout when mouse leaves the area
@@ -614,7 +614,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
               // Show intensity slider for 2 seconds when toggling neon
               showNeonSliderFor2Seconds();
             }}
-            className={`w-12 h-12 rounded-full backdrop-blur-sm border transition-all duration-300 flex items-center justify-center shadow-lg ${
+            className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full backdrop-blur-sm border transition-all duration-300 flex items-center justify-center shadow-lg ${
               localNeonOn
                 ? 'bg-yellow-500/90 text-white border-yellow-400 hover:bg-yellow-600/90'
                 : 'bg-gray-800/90 text-gray-300 border-gray-600 hover:bg-gray-700/90'
@@ -623,12 +623,12 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
           >
             {localNeonOn ? (
               // Lampe AN - Gefüllte Glühbirne
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
               </svg>
             ) : (
               // Lampe AUS - Outline Glühbirne
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
               </svg>
             )}
@@ -642,9 +642,9 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 : 'opacity-0 translate-y-2 pointer-events-none'
             }`}
           >
-            <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-3 shadow-lg min-w-[140px]">
+           <div className="bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg p-2 sm:p-3 shadow-lg min-w-[120px] sm:min-w-[140px]">
               <div className="flex items-center space-x-2 mb-2">
-                <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+               <svg className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M9 21c0 .5.4 1 1 1h4c.6 0 1-.5 1-1v-1H9v1zm3-19C8.1 2 5 5.1 5 9c0 2.4 1.2 4.5 3 5.7V17c0 .5.4 1 1 1h6c.6 0 1-.5 1-1v-2.3c1.8-1.2 3-3.3 3-5.7 0-3.9-3.1-7-7-7z"/>
                 </svg>
                 <span className="text-xs font-medium text-gray-700">Intensität</span>
@@ -678,17 +678,17 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       )}
 
       {/* Kompakte Button-Leiste */}
-      <div className="absolute top-4 right-4 z-10 flex items-center space-x-2">
+      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 flex items-center space-x-1 sm:space-x-2">
         <button
           onClick={toggleTechnicalView}
-          className={`w-10 h-10 rounded-lg transition-all duration-300 border backdrop-blur-sm flex items-center justify-center shadow-lg ${
+          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg transition-all duration-300 border backdrop-blur-sm flex items-center justify-center shadow-lg ${
             showTechnicalView
               ? 'bg-blue-600 text-white border-blue-500'
               : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white'
           }`}
           title={showTechnicalView ? 'Zurück zur Neon-Ansicht' : 'Technische Skizze anzeigen'}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </button>
@@ -696,10 +696,10 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
         {showTechnicalView && (
           <button
             onClick={downloadTechnicalSVG}
-            className="w-10 h-10 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center"
+            className="w-8 h-8 sm:w-10 sm:h-10 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all duration-300 shadow-lg flex items-center justify-center"
             title="Original SVG-Datei herunterladen"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </button>
@@ -707,14 +707,14 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
         <button 
           onClick={()=>setOpen(v=>!v)}
-          className={`w-10 h-10 rounded-lg transition-all duration-300 border backdrop-blur-sm flex items-center justify-center shadow-lg ${
+          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg transition-all duration-300 border backdrop-blur-sm flex items-center justify-center shadow-lg ${
             open 
               ? 'bg-blue-600 text-white border-blue-500' 
               : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white'
           }`}
           title="Weitere Optionen"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
@@ -723,8 +723,8 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
       {/* Technical View Indicator */}
       {showTechnicalView && (
-        <div className="absolute bottom-4 left-4 z-10 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg flex items-center space-x-2">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-10 bg-blue-600 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium shadow-lg flex items-center space-x-1 sm:space-x-2">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
           <span>Original SVG</span>
@@ -733,7 +733,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
       {/* Zoom Controls für technische Ansicht */}
       {showTechnicalView && (
-        <div className="absolute top-20 right-4 z-10 flex flex-col space-y-2">
+        <div className="absolute top-16 sm:top-20 right-2 sm:right-4 z-10 flex flex-col space-y-1 sm:space-y-2">
           <button
             onClick={() => {
               // Zoom In für technische Ansicht
@@ -744,10 +744,10 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 plane.style.transform = plane.style.transform.replace(/scale\([^)]+\)/, `scale(${newScale})`);
               }
             }}
-            className="w-10 h-10 bg-white/90 hover:bg-white text-gray-700 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
+            className="w-8 h-8 sm:w-10 sm:h-10 bg-white/90 hover:bg-white text-gray-700 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
             title="Vergrößern"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
           </button>
@@ -761,10 +761,10 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 plane.style.transform = plane.style.transform.replace(/scale\([^)]+\)/, `scale(${newScale})`);
               }
             }}
-            className="w-10 h-10 bg-white/90 hover:bg-white text-gray-700 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
+            className="w-8 h-8 sm:w-10 sm:h-10 bg-white/90 hover:bg-white text-gray-700 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
             title="Verkleinern"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
             </svg>
           </button>
@@ -777,10 +777,10 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                 setDrag({dx: 0, dy: 0});
               }
             }}
-            className="w-10 h-10 bg-white/90 hover:bg-white text-gray-700 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
+            className="w-8 h-8 sm:w-10 sm:h-10 bg-white/90 hover:bg-white text-gray-700 rounded-lg flex items-center justify-center shadow-lg transition-all duration-300 hover:scale-110"
             title="Zurücksetzen"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
@@ -790,11 +790,12 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
       {/* Vollbild hint */}
       {!showTechnicalView && (
         <div 
-          className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm cursor-pointer hover:bg-black/70 transition-all duration-300 hover:scale-105 active:scale-95"
+          className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 z-10 bg-black/50 text-white px-2 py-1 rounded-lg text-xs backdrop-blur-sm cursor-pointer hover:bg-black/70 transition-all duration-300 hover:scale-105 active:scale-95"
           onClick={openZoomModal}
           title="Vollbild-Ansicht öffnen"
         >
-          💡 Vollbild für Details
+          <span className="hidden sm:inline">💡 Vollbild für Details</span>
+          <span className="sm:hidden">💡 Zoom</span>
         </div>
       )}
 
@@ -806,7 +807,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
             <div className="space-y-3">
               <button 
                 onClick={()=> setDrag({dx:0,dy:0})} 
-                className="w-full px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors"
+                className="w-full px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium transition-colors"
               >
                 Zentrieren
               </button>
@@ -815,7 +816,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
                   handlePickSvg();
                   setOpen(false);
                 }}
-                className="w-full px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm font-medium transition-colors"
+                className="w-full px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-md text-sm font-medium transition-colors"
               >
                 SVG laden…
               </button>
@@ -829,12 +830,12 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
     {/* Hintergrund-Auswahl - Unten links, klein und kompakt */}
     {!showTechnicalView && (
-      <div className="absolute bottom-4 left-4 z-10 flex space-x-1">
+      <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-10 flex space-x-1">
       {AVAILABLE_BACKGROUNDS.map((bg) => (
         <button
           key={bg.key}
           onClick={() => handleBackgroundChange(bg.key)}
-          className={`w-8 h-8 rounded-md text-xs font-bold transition-all duration-300 shadow-sm border ${
+          className={`w-6 h-6 sm:w-8 sm:h-8 rounded-md text-xs font-bold transition-all duration-300 shadow-sm border ${
             currentBackground === bg.key
               ? 'bg-blue-600 text-white border-blue-500 scale-110'
               : 'bg-white/90 text-gray-700 border-gray-200 hover:bg-white hover:scale-105'
@@ -851,54 +852,55 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
 
     {/* Zoom Modal */}
     {showZoomModal && (
-      <div className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50">
+     <div className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-2 sm:p-0">
         <div className="relative w-full h-full bg-black overflow-hidden">
           {/* Modal Header */}
-          <div className="absolute top-0 left-0 right-0 bg-black/80 backdrop-blur-sm border-b border-gray-600 p-4 z-20 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-white">Design-Detailansicht</h3>
-            <div className="flex items-center space-x-2">
+         <div className="absolute top-0 left-0 right-0 bg-black/80 backdrop-blur-sm border-b border-gray-600 p-2 sm:p-4 z-20 flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
+           <h3 className="text-base sm:text-lg font-semibold text-white">Design-Detailansicht</h3>
+           <div className="flex items-center space-x-1 sm:space-x-2 w-full sm:w-auto justify-between sm:justify-end">
               {/* Zoom Controls */}
               <button
                 onClick={handleModalZoomIn}
-                className="w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-lg flex items-center justify-center transition-colors"
+               className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/30 text-white rounded-lg flex items-center justify-center transition-colors"
                 title="Vergrößern"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </button>
               <button
                 onClick={handleModalZoomOut}
-                className="w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-lg flex items-center justify-center transition-colors"
+               className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/30 text-white rounded-lg flex items-center justify-center transition-colors"
                 title="Verkleinern"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                 </svg>
               </button>
               <button
                 onClick={resetModalZoom}
-                className="w-10 h-10 bg-white/20 hover:bg-white/30 text-white rounded-lg flex items-center justify-center transition-colors"
+               className="w-8 h-8 sm:w-10 sm:h-10 bg-white/20 hover:bg-white/30 text-white rounded-lg flex items-center justify-center transition-colors"
                 title="Zurücksetzen"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </button>
               
               {/* Zoom Level Display */}
-              <div className="bg-white/20 text-white px-3 py-1 rounded-lg text-sm font-medium">
+             <div className="bg-white/20 text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium">
                 {(modalZoom * 100).toFixed(0)}%
               </div>
               
               <button
                 onClick={downloadTechnicalSVG}
-                className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center space-x-1"
+               className="px-2 sm:px-3 py-1 sm:py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span>Original SVG</span>
+               <span className="hidden sm:inline">Original SVG</span>
+               <span className="sm:hidden">SVG</span>
               </button>
               <button
                 onClick={() => setShowZoomModal(false)}
@@ -912,7 +914,7 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
           </div>
 
           {/* Modal Content */}
-          <div className="pt-16 w-full h-full bg-black flex items-center justify-center overflow-hidden">
+          <div className="pt-20 sm:pt-16 w-full h-full bg-black flex items-center justify-center overflow-hidden">
             {showTechnicalView ? (
               // Technische Ansicht: Original SVG
               originalSvgRef.current ? (
@@ -994,15 +996,16 @@ const NeonMockupStage: React.FC<NeonMockupStageProps> = ({
           
           {/* Modal Zoom Level Indicator */}
           {modalZoom !== 1.0 && (
-            <div className="absolute bottom-4 left-4 z-20 bg-white/20 text-white px-3 py-1 rounded-lg text-sm font-medium backdrop-blur-sm">
+            <div className="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-20 bg-white/20 text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium backdrop-blur-sm">
               Zoom: {(modalZoom * 100).toFixed(0)}%
             </div>
           )}
           
           {/* Drag Hint */}
           {modalZoom > 1 && (
-            <div className="absolute bottom-4 right-4 z-20 bg-white/20 text-white px-3 py-1 rounded-lg text-xs backdrop-blur-sm">
-              Ziehen zum Verschieben
+            <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 z-20 bg-white/20 text-white px-2 sm:px-3 py-1 rounded-lg text-xs backdrop-blur-sm">
+              <span className="hidden sm:inline">Ziehen zum Verschieben</span>
+              <span className="sm:hidden">Ziehen</span>
             </div>
           )}
         </div>
