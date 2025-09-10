@@ -13,8 +13,8 @@ export default defineConfig({
         target: 'https://api.monday.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/monday/, '/v2'),
-        timeout: 30000,
-        proxyTimeout: 30000,
+        timeout: 10000,
+        proxyTimeout: 10000,
         secure: true,
         headers: {
           'Origin': 'https://api.monday.com',
@@ -23,6 +23,11 @@ export default defineConfig({
         configure: (proxy, options) => {
           proxy.on('error', (err, req, res) => {
             console.error('❌ Proxy Error:', err);
+            // Send a proper error response instead of hanging
+            if (!res.headersSent) {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'Proxy connection failed' }));
+            }
           });
           proxy.on('proxyReq', (proxyReq, req, res) => {
             console.log('📤 Proxy Request:', req.method, req.url);
@@ -30,6 +35,11 @@ export default defineConfig({
             proxyReq.setHeader('User-Agent', 'Neon-Konfigurator/1.0');
             proxyReq.setHeader('Accept', 'application/json');
             proxyReq.setHeader('API-Version', '2023-10');
+            // Set timeout on the proxy request
+            proxyReq.setTimeout(10000, () => {
+              console.error('❌ Proxy request timeout');
+              proxyReq.destroy();
+            });
           });
           proxy.on('proxyRes', (proxyRes, req, res) => {
             console.log('📥 Proxy Response:', proxyRes.statusCode);

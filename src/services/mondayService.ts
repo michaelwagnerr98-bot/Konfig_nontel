@@ -235,6 +235,7 @@ class MondayService {
           'API-Version': '2023-10',
         },
         body: JSON.stringify({ query }),
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       });
       
       console.log('📡 API-Antwort:', {
@@ -252,9 +253,25 @@ class MondayService {
           url: response.url
         };
         console.error('❌ Monday API Error Details:', errorDetails);
-        this.lastError = `API Error ${response.status}: ${response.statusText}`;
+        
+        // More specific error messages
+        if (response.status === 401) {
+          this.lastError = 'Ungültiger API-Token';
+        } else if (response.status === 403) {
+          this.lastError = 'API-Token hat keine Berechtigung';
+        } else if (response.status >= 500) {
+          this.lastError = 'Monday.com Server-Fehler';
+        } else {
+          this.lastError = `API Error ${response.status}: ${response.statusText}`;
+        }
+        
         this.connectionDetails.errorCount++;
-        throw new Error(`Monday API Error: ${response.status} - ${response.statusText}`);
+        
+        // Don't throw error, just log and use fallback
+        console.warn('⚠️ API-Fehler, verwende Fallback-Preise');
+        this.isConnected = false;
+        this.lastSync = new Date();
+        return this.cache;
       }
 
       const data: MondayApiResponse = await response.json();
@@ -513,16 +530,31 @@ class MondayService {
       return this.cache;
 
     } catch (error) {
+      // Handle different types of errors
+      let errorMessage = 'Unbekannter Fehler';
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError' || error.message.includes('timeout')) {
+          errorMessage = 'API-Timeout (>10s)';
+        } else if (error.message.includes('fetch')) {
+          errorMessage = 'Netzwerk-Verbindungsfehler';
+        } else if (error.message.includes('socket hang up')) {
+          errorMessage = 'Verbindung unterbrochen';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       console.error('❌ Monday.com Sync Fehler:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: errorMessage,
         timestamp: new Date().toISOString(),
         tokenAvailable: !!this.apiToken,
         tokenLength: this.apiToken.length
       });
       
       this.isConnected = false;
-      this.lastError = error instanceof Error ? error.message : 'Unbekannter Fehler';
+      this.lastError = errorMessage;
       this.connectionDetails.errorCount++;
       
       // Keep using fallback prices on error
