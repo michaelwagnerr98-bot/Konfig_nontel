@@ -147,7 +147,7 @@ function HomePage() {
         </div>
 
         {/* Technical Data Bar */}
-        <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+        <div className="mb-3 bg-white rounded-lg shadow-sm p-4">
           <div className="flex items-center justify-between">
             {/* Left side - Technical Data */}
             <div className="flex items-center space-x-6">
