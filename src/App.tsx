@@ -494,8 +494,6 @@ function HomePage() {
             
             {/* Rechts: Kontakt & Status */}
             <div className="flex items-center space-x-3 text-gray-400">
-              <span>📞 +49 163 1661464</span>
-              <span>📧 info@nontel.de</span>
               <MondayStatus />
             </div>
           </div>
