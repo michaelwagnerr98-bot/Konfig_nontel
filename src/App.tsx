@@ -471,35 +471,29 @@ function HomePage() {
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          {/* Copyright oben */}
-          <div className="text-center text-gray-300 text-sm mb-4">
-            © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
-          </div>
-          
-          {/* Kompakte rechtliche Links */}
-          <div className="flex flex-wrap items-center justify-center space-x-1 text-xs text-gray-400 mb-4">
-            <a href="/widerrufsrecht" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Widerrufsrecht</a>
-            <span className="text-gray-600">•</span>
-            <a href="/datenschutz" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Datenschutzerklärung</a>
-            <span className="text-gray-600">•</span>
-            <a href="/agb" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">AGB</a>
-            <span className="text-gray-600">•</span>
-            <a href="/zahlung-versand" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Zahlung und Versand</a>
-            <span className="text-gray-600">•</span>
-            <a href="/impressum" className="hover:text-blue-400 transition-colors px-2 py-1 rounded hover:bg-gray-800">Impressum</a>
-          </div>
-          
-          {/* Kontakt und Status in einer Zeile */}
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0">
-            <div className="flex items-center space-x-4 text-xs text-gray-400">
-              <span>📞 +49 163 1661464</span>
-              <span>📧 info@nontel.de</span>
-              <span>USt-IdNr.: DE328488548</span>
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          {/* Ultra-kompakte einzeilige Anordnung */}
+          <div className="flex flex-col lg:flex-row items-center justify-between space-y-2 lg:space-y-0 text-xs">
+            {/* Links: Copyright */}
+            <div className="text-gray-400">
+              © 2025 Nontel - Michael Wagner
             </div>
             
-            {/* System Status */}
-            <div className="flex justify-center">
+            {/* Mitte: Rechtliche Links */}
+            <div className="flex items-center space-x-1 text-gray-500">
+              <a href="/agb" className="hover:text-blue-400 transition-colors px-1">AGB</a>
+              <span>•</span>
+              <a href="/datenschutz" className="hover:text-blue-400 transition-colors px-1">Datenschutz</a>
+              <span>•</span>
+              <a href="/widerrufsrecht" className="hover:text-blue-400 transition-colors px-1">Widerruf</a>
+              <span>•</span>
+              <a href="/impressum" className="hover:text-blue-400 transition-colors px-1">Impressum</a>
+            </div>
+            
+            {/* Rechts: Kontakt & Status */}
+            <div className="flex items-center space-x-3 text-gray-400">
+              <span>📞 +49 163 1661464</span>
+              <span>📧 info@nontel.de</span>
               <MondayStatus />
             </div>
           </div>
