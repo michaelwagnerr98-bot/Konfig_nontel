@@ -35,6 +35,8 @@ function App() {
 function HomePage() {
   const navigate = useNavigate();
   const [designs, setDesigns] = useState<NeonDesign[]>([]);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [cartItemCount, setCartItemCount] = useState(0);
   
   // Configuration state
   const [config, setConfig] = useState<ConfigurationState>({
@@ -90,6 +92,11 @@ function HomePage() {
 
     loadDesigns();
   }, []);
+
+  // Update cart item count when signs change
+  useEffect(() => {
+    setCartItemCount(config.signs?.length || 0);
+  }, [config.signs]);
 
   const handleConfigChange = (updates: Partial<ConfigurationState>) => {
     setConfig(prev => ({ ...prev, ...updates }));
@@ -294,6 +301,8 @@ function HomePage() {
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => {
+                  setIsAddingToCart(true);
+                  
                   const newSign: SignConfiguration = {
                     id: `sign-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                     design: config.selectedDesign,
@@ -310,12 +319,39 @@ function HomePage() {
                   handleConfigChange({
                     signs: [...(config.signs || []), newSign],
                   });
+                  
+                  // Animation für 1 Sekunde
+                  setTimeout(() => {
+                    setIsAddingToCart(false);
+                  }, 1000);
                 }}
-                className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative overflow-hidden ${
+                  isAddingToCart
+                    ? 'bg-green-600 text-white scale-105 shadow-xl'
+                    : 'bg-green-500 hover:bg-green-600 text-white hover:scale-105'
+                }`}
               >
-                <Plus className="h-5 w-5" />
-                <span>Hinzufügen</span>
+                {isAddingToCart ? (
+                  <>
+                    <div className="bg-white/20 rounded-full p-1">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <span>Hinzugefügt!</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-5 w-5" />
+                    <span>Hinzufügen</span>
+                  </>
+                )}
                 <span className="bg-white/20 px-2 py-1 rounded-full text-sm">€{currentDesignPrice.toFixed(2)}</span>
+                
+                {/* Shimmer effect during animation */}
+                {isAddingToCart && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                )}
               </button>
 
               <button
@@ -341,10 +377,21 @@ function HomePage() {
                   localStorage.setItem('neon-configurator-state', JSON.stringify(configToSave));
                   navigate('/pricing');
                 }}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative ${
+                  cartItemCount > 0
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 animate-pulse'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'
+                }`}
               >
                 <Truck className="h-5 w-5" />
                 <span>Versand berechnen</span>
+                
+                {/* Animated Cart Badge */}
+                {cartItemCount > 0 && (
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-sm font-bold rounded-full h-6 w-6 flex items-center justify-center animate-bounce shadow-lg border-2 border-white">
+                    {cartItemCount}
+                  </div>
+                )}
               </button>
             </div>
           </div>
