@@ -72,11 +72,12 @@
   transition: all 0.2s ease;
   position: relative;
   margin-top: -6px;
+  transform: translateY(0px);
 }
 
 .slider::-webkit-slider-thumb:hover {
   background: #1d4ed8;
-  transform: scale(1.1);
+  transform: translateY(0px) scale(1.1);
 }
 
 .slider::-moz-range-thumb {
@@ -87,11 +88,13 @@
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
+  margin-top: 0px;
+  transform: translateY(0px);
 }
 
 .slider::-moz-range-thumb:hover {
   background: #1d4ed8;
-  transform: scale(1.1);
+  transform: translateY(0px) scale(1.1);
 }
 
 .slider:focus::-webkit-slider-thumb {
