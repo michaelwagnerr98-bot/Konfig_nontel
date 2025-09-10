@@ -164,6 +164,16 @@ button:hover {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Enhanced shimmer animation */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
 /* Fade-in animation for mehrteilig option */
 @keyframes fade-in {
   from { 

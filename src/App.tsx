@@ -325,32 +325,41 @@ function HomePage() {
                     setIsAddingToCart(false);
                   }, 1000);
                 }}
-                className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative overflow-hidden ${
+                className={`font-bold px-6 py-3 rounded-lg transition-all duration-500 transform shadow-lg flex items-center space-x-2 relative overflow-hidden ${
                   isAddingToCart
-                    ? 'bg-green-600 text-white scale-105 shadow-xl'
-                    : 'bg-green-500 hover:bg-green-600 text-white hover:scale-105'
+                    ? 'bg-gradient-to-r from-green-400 via-emerald-500 to-green-600 text-white scale-110 shadow-2xl rotate-1'
+                    : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white hover:scale-105 hover:shadow-xl'
                 }`}
               >
                 {isAddingToCart ? (
                   <>
-                    <div className="bg-white/20 rounded-full p-1">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="bg-white/30 rounded-full p-1 animate-spin">
+                      <svg className="w-5 h-5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span>Hinzugefügt!</span>
+                    <span className="animate-pulse">✨ Hinzugefügt!</span>
                   </>
                 ) : (
                   <>
-                    <Plus className="h-5 w-5" />
+                    <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
                     <span>Hinzufügen</span>
                   </>
                 )}
                 <span className="bg-white/20 px-2 py-1 rounded-full text-sm">€{currentDesignPrice.toFixed(2)}</span>
                 
-                {/* Shimmer effect during animation */}
+                {/* Glowing wave effect during animation */}
                 {isAddingToCart && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
+                )}
+                
+                {/* Success particles effect */}
+                {isAddingToCart && (
+                  <>
+                    <div className="absolute top-0 left-1/4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="absolute top-0 right-1/4 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.3s' }}></div>
+                    <div className="absolute bottom-0 left-1/3 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDelay: '0.5s' }}></div>
+                  </>
                 )}
               </button>
 
@@ -377,20 +386,27 @@ function HomePage() {
                   localStorage.setItem('neon-configurator-state', JSON.stringify(configToSave));
                   navigate('/pricing');
                 }}
-                className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative ${
+                className={`font-bold px-6 py-3 rounded-lg transition-all duration-300 transform shadow-lg flex items-center space-x-2 relative group overflow-hidden ${
                   cartItemCount > 0
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 animate-pulse'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-105'
+                    ? 'bg-gradient-to-r from-blue-500 via-purple-600 to-blue-700 text-white hover:scale-105 animate-glow'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:scale-105'
                 }`}
               >
-                <Truck className="h-5 w-5" />
+                <Truck className={`h-5 w-5 transition-transform ${cartItemCount > 0 ? 'animate-bounce' : 'group-hover:translate-x-1'}`} />
                 <span>Versand berechnen</span>
                 
-                {/* Animated Cart Badge */}
+                {/* Animated Cart Badge with improved styling */}
                 {cartItemCount > 0 && (
-                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-sm font-bold rounded-full h-6 w-6 flex items-center justify-center animate-bounce shadow-lg border-2 border-white">
+                  <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-600 text-white text-sm font-bold rounded-full h-7 w-7 flex items-center justify-center animate-bounce shadow-xl border-3 border-white transform scale-110">
                     {cartItemCount}
+                    {/* Pulsing ring effect */}
+                    <div className="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75"></div>
                   </div>
+                )}
+                
+                {/* Flowing background effect when items in cart */}
+                {cartItemCount > 0 && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
                 )}
               </button>
             </div>
