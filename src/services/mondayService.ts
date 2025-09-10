@@ -96,6 +96,8 @@ class MondayService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiToken}`,
+          'API-Version': '2023-10',
         },
         body: JSON.stringify({ query: testQuery }),
       });
@@ -229,6 +231,8 @@ class MondayService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.apiToken}`,
+          'API-Version': '2023-10',
         },
         body: JSON.stringify({ query }),
       });
