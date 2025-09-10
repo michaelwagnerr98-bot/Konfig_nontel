@@ -470,7 +470,7 @@ function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white mt-16">
+      <footer className="bg-gray-800 text-white">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
             {/* Legal Links */}
