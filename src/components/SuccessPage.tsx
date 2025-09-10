@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Package, ArrowRight, Home } from 'lucide-react';
 
 const SuccessPage: React.FC = () => {
@@ -108,7 +109,7 @@ const SuccessPage: React.FC = () => {
               onClick={() => navigate('/')}
               className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
             >
-              <Edit3 className="h-5 w-5" />
+              <ArrowRight className="h-5 w-5" />
               <span>Neues Design konfigurieren</span>
             </button>
             

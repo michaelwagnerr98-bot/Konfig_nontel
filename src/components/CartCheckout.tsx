@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, CreditCard, FileText, Edit3, Truck, Home, MapPin, Package, Eye, EyeOff, X } from 'lucide-react';
 import { ConfigurationState } from '../types/configurator';
 import { calculateSingleSignPrice, calculateDistance, getShippingInfo, calculateArea } from '../utils/calculations';
@@ -20,6 +21,7 @@ const CartCheckout: React.FC<CartCheckoutProps> = ({
   onRemoveSign,
   onBackToDesign,
 }) => {
+  const navigate = useNavigate();
   const [showPostalCodeInput, setShowPostalCodeInput] = useState(false);
   const [tempPostalCode, setTempPostalCode] = useState('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -173,7 +175,7 @@ const CartCheckout: React.FC<CartCheckoutProps> = ({
         
         if (confirmed) {
           // Simulate successful payment
-          window.location.href = '/success?demo=true';
+          navigate('/success?demo=true');
         }
       }
     } catch (error: any) {
