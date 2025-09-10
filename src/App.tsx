@@ -124,14 +124,6 @@ function HomePage() {
               </svg>
             </button>
 
-            {/* Size buttons S M L O */}
-            <div className="absolute bottom-4 left-4 z-10 flex space-x-2">
-              <button className="w-8 h-8 bg-gray-800/80 text-white rounded-md text-sm font-bold hover:bg-gray-700/80 transition-colors">S</button>
-              <button className="w-8 h-8 bg-blue-600 text-white rounded-md text-sm font-bold hover:bg-blue-700 transition-colors">M</button>
-              <button className="w-8 h-8 bg-gray-800/80 text-white rounded-md text-sm font-bold hover:bg-gray-700/80 transition-colors">L</button>
-              <button className="w-8 h-8 bg-gray-800/80 text-white rounded-md text-sm font-bold hover:bg-gray-700/80 transition-colors">O</button>
-            </div>
-
             {/* Design indicators */}
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
               <div className="w-3 h-3 bg-white rounded-full"></div>
