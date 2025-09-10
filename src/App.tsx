@@ -308,7 +308,7 @@ function HomePage() {
                   };
                   
                   handleConfigChange({
-                    signs: [...(prev.signs || []), newSign],
+                    signs: [...(config.signs || []), newSign],
                   });
                 }}
                 className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
