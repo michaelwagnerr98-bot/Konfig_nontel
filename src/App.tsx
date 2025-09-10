@@ -340,28 +340,6 @@ function HomePage() {
             {/* Main Grid - Responsive layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
               {/* Left Column - Design Selection */}
-              <div className="lg:col-span-4 space-y-6">
-                <DesignSelector
-                  designs={designs}
-                  selectedDesign={config.selectedDesign}
-                  onDesignChange={handleDesignChange}
-                  onToggleDesign={handleToggleDesign}
-                  config={config}
-                  signs={config.signs}
-                  onSignToggle={handleSignToggle}
-                  onRemoveSign={handleRemoveSign}
-                  isWaterproof={config.isWaterproof}
-                  isTwoPart={config.isTwoPart}
-                  hasUvPrint={config.hasUvPrint}
-                  onUvPrintChange={(hasUvPrint) => handleConfigChange({ hasUvPrint })}
-                  onConfigChange={handleConfigChange}
-                />
-                
-                <ConfigurationPanel
-                  config={config}
-                  onConfigChange={handleConfigChange}
-                />
-              </div>
 
               {/* Center Column - Mockup Display */}
               <div className="lg:col-span-5">
