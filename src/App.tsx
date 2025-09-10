@@ -98,7 +98,7 @@ function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="flex items-center justify-between p-4">
         {/* Logo */}
