@@ -90,15 +90,12 @@ class MondayService {
     try {
       console.log('🧪 Teste Monday.com API-Verbindung...');
       
-      // Direkter API-Aufruf ohne Proxy für Test
       const testQuery = `query { boards(ids: [${this.boardId}]) { id name } }`;
       
-      const response = await fetch('https://api.monday.com/v2', {
+      const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiToken}`,
-          'API-Version': '2023-10',
         },
         body: JSON.stringify({ query: testQuery }),
       });
@@ -226,14 +223,12 @@ class MondayService {
       
       const usedMethod = 'Direct API Call';
       
-      // Direkter API-Aufruf
-      console.log('🔄 Direkte Monday.com API-Anfrage...');
-      const response = await fetch('https://api.monday.com/v2', {
+      // Proxy API-Aufruf
+      console.log('🔄 Monday.com API-Anfrage über Proxy...');
+      const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiToken}`,
-          'API-Version': '2023-10',
         },
         body: JSON.stringify({ query }),
       });
