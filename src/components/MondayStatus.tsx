@@ -85,7 +85,6 @@ const MondayStatus: React.FC = () => {
         </div>
       )}
       {status.autoSyncActive && (
-        <span className="text-green-500">●</span>
       )}
       {isManualSyncing && (
         <RefreshCw className="h-3 w-3 animate-spin text-yellow-500" />
