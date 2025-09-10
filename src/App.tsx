@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Zap, Palette, Calculator, ShoppingCart } from 'lucide-react';
-import DesignSelector from './components/DesignSelector';
+import { Zap, Shield, Calculator, Plus, Truck } from 'lucide-react';
 import ConfigurationPanel from './components/ConfigurationPanel';
-import PricingCalculator from './components/PricingCalculator';
 import PricingPage from './components/PricingPage';
-import MockupDisplay from './components/MockupDisplay';
 import NeonMockupStage from './components/NeonMockupStage';
 import MondayStatus from './components/MondayStatus';
 import { ConfigurationState, NeonDesign, SignConfiguration, ShippingOption } from './types/configurator';
-import { calculateProportionalHeight, calculateProportionalLedLength } from './utils/calculations';
+import { calculateProportionalHeight, calculateProportionalLedLength, calculateSingleSignPrice } from './utils/calculations';
 import { getAvailableDesigns } from './data/mockDesigns';
 
 // Main App component
@@ -28,7 +25,6 @@ function App() {
 function HomePage() {
   const navigate = useNavigate();
   const [designs, setDesigns] = useState<NeonDesign[]>([]);
-  const [currentView, setCurrentView] = useState('design');
   
   // Configuration state
   const [config, setConfig] = useState<ConfigurationState>({
@@ -42,7 +38,7 @@ function HomePage() {
       mockupUrl: '',
       description: 'Loading designs...'
     },
-    customWidth: 100,
+    customWidth: 200,
     calculatedHeight: 100,
     isWaterproof: false,
     isTwoPart: false,
@@ -67,13 +63,13 @@ function HomePage() {
           const initialHeight = calculateProportionalHeight(
             firstDesign.originalWidth,
             firstDesign.originalHeight,
-            100
+            200
           );
           
           setConfig(prev => ({
             ...prev,
             selectedDesign: firstDesign,
-            customWidth: 100,
+            customWidth: 200,
             calculatedHeight: initialHeight,
           }));
         }
@@ -89,148 +85,226 @@ function HomePage() {
     setConfig(prev => ({ ...prev, ...updates }));
   };
 
-  const handleDesignChange = (design: NeonDesign) => {
-    const newHeight = calculateProportionalHeight(
-      design.originalWidth,
-      design.originalHeight,
-      config.customWidth
-    );
-    
-    setConfig(prev => ({
-      ...prev,
-      selectedDesign: design,
-      calculatedHeight: newHeight,
-    }));
-  };
-
-  const handleToggleDesign = (design: NeonDesign, added: boolean) => {
-    if (!added) return; // Only handle adding designs
-    
-    const newSign: SignConfiguration = {
-      id: `sign-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      design,
-      width: config.customWidth,
-      height: config.calculatedHeight,
-      isEnabled: true,
-      isWaterproof: config.isWaterproof,
-      isTwoPart: config.isTwoPart,
-      hasUvPrint: config.hasUvPrint,
-      hasHangingSystem: config.hasHangingSystem,
-      expressProduction: config.expressProduction,
-    };
-    
-    setConfig(prev => ({
-      ...prev,
-      signs: [...(prev.signs || []), newSign],
-    }));
-  };
-
-  const handleSignToggle = (signId: string, enabled: boolean) => {
-    setConfig(prev => ({
-      ...prev,
-      signs: prev.signs?.map(sign =>
-        sign.id === signId ? { ...sign, isEnabled: enabled } : sign
-      ) || [],
-    }));
-  };
-
-  const handleRemoveSign = (signId: string) => {
-    setConfig(prev => ({
-      ...prev,
-      signs: prev.signs?.filter(sign => sign.id !== signId) || [],
-    }));
-  };
-
-  const handleShippingChange = (shipping: ShippingOption | null) => {
-    setConfig(prev => ({ ...prev, selectedShipping: shipping }));
-  };
+  // Calculate current design price
+  const currentDesignPrice = calculateSingleSignPrice(
+    config.selectedDesign,
+    config.customWidth,
+    config.calculatedHeight,
+    config.isWaterproof,
+    config.isTwoPart || false,
+    config.hasUvPrint,
+    config.hasHangingSystem || false,
+    config.expressProduction || false
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header - Responsive design */}
-      <header className="bg-white shadow-sm border-b relative">
-        {currentView === 'design' && (
-          <main className="max-w-7xl mx-auto px-4 py-6 md:py-8">
-        {/* Main Grid - Responsive layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-          {/* Left Column - Configuration */}
-          <div className="lg:col-span-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600">
+      {/* Header */}
+      <header className="flex items-center justify-between p-4">
+        {/* Logo */}
+        <div className="flex items-center space-x-2">
+          <div className="bg-white rounded-lg p-2">
+            <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded"></div>
+          </div>
+          <span className="text-white font-bold text-lg">NONTEL</span>
+        </div>
+
+        {/* Center - Admin */}
+        <div className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
+          👤 Admin
+        </div>
+
+        {/* Right - Secure Connection */}
+        <div className="flex items-center space-x-2">
+          <div className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm flex items-center space-x-1">
+            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+            <span>Sichere Verbindung</span>
+          </div>
+          <div className="bg-white/20 backdrop-blur-sm text-white p-2 rounded-lg">
+            <Shield className="h-4 w-4" />
+          </div>
+          <div className="bg-white/20 backdrop-blur-sm text-white p-2 rounded-lg">
+            <Zap className="h-4 w-4" />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="px-4 pb-8">
+        {/* Mockup Stage - Full Width */}
+        <div className="mb-6">
+          <div className="relative bg-gray-900 rounded-xl overflow-hidden shadow-2xl" style={{ height: '400px' }}>
+            {/* Yellow bulb icon */}
+            <div className="absolute top-4 left-4 z-10 bg-yellow-500 rounded-full p-3 shadow-lg">
+              <div className="w-6 h-6 bg-yellow-600 rounded-full flex items-center justify-center">
+                <div className="w-3 h-3 bg-white rounded-full"></div>
+              </div>
+            </div>
+
+            {/* Navigation arrows */}
+            <button className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10">
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <button className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 hover:scale-110 z-10">
+              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Size buttons S M L O */}
+            <div className="absolute bottom-4 left-4 z-10 flex space-x-2">
+              <button className="w-8 h-8 bg-gray-800/80 text-white rounded-md text-sm font-bold hover:bg-gray-700/80 transition-colors">S</button>
+              <button className="w-8 h-8 bg-blue-600 text-white rounded-md text-sm font-bold hover:bg-blue-700 transition-colors">M</button>
+              <button className="w-8 h-8 bg-gray-800/80 text-white rounded-md text-sm font-bold hover:bg-gray-700/80 transition-colors">L</button>
+              <button className="w-8 h-8 bg-gray-800/80 text-white rounded-md text-sm font-bold hover:bg-gray-700/80 transition-colors">O</button>
+            </div>
+
+            {/* Design indicators */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+              <div className="w-3 h-3 bg-white rounded-full"></div>
+              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
+              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
+              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
+              <div className="w-3 h-3 bg-white/40 rounded-full"></div>
+            </div>
+
+            {/* Vollbild hint */}
+            <div className="absolute bottom-4 right-4 z-10 bg-black/50 text-white px-3 py-1 rounded-lg text-sm backdrop-blur-sm">
+              💡 Vollbild für Details
+            </div>
+
+            <NeonMockupStage
+              lengthCm={Math.max(config.customWidth, config.calculatedHeight)}
+              waterproof={config.isWaterproof}
+              neonOn={true}
+              uvOn={config.hasUvPrint || true}
+              selectedBackground="ab_100cm_50%"
+              onWaterproofChange={(isWaterproof) => handleConfigChange({ isWaterproof })}
+            />
+          </div>
+        </div>
+
+        {/* Technical Data Bar */}
+        <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
+          <div className="flex items-center justify-between">
+            {/* Left side - Technical Data */}
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-sm font-medium text-gray-700">Technische Daten</span>
+              </div>
+              <div className="flex items-center space-x-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Elemente: </span>
+                  <span className="font-bold text-green-600">{config.selectedDesign.elements}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">LED-Länge: </span>
+                  <span className="font-bold text-green-600">
+                    {calculateProportionalLedLength(
+                      config.selectedDesign.originalWidth,
+                      config.selectedDesign.originalHeight,
+                      config.selectedDesign.ledLength,
+                      config.customWidth,
+                      config.calculatedHeight
+                    )}m
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Verbrauch: </span>
+                  <span className="font-bold text-green-600">
+                    {Math.round(calculateProportionalLedLength(
+                      config.selectedDesign.originalWidth,
+                      config.selectedDesign.originalHeight,
+                      config.selectedDesign.ledLength,
+                      config.customWidth,
+                      config.calculatedHeight
+                    ) * 8 * 1.25)}W
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Original Data */}
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm font-medium text-gray-700">Originale Daten</span>
+              </div>
+              <div className="flex items-center space-x-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Breite: </span>
+                  <span className="font-bold text-blue-600">{config.selectedDesign.originalWidth}cm</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Höhe: </span>
+                  <span className="font-bold text-blue-600">{config.selectedDesign.originalHeight}cm</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">LED-Länge: </span>
+                  <span className="font-bold text-blue-600">{config.selectedDesign.ledLength}m</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Configuration and Action Buttons */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Configuration Panel */}
+          <div className="lg:col-span-2">
             <ConfigurationPanel
               config={config}
               onConfigChange={handleConfigChange}
             />
           </div>
 
-          {/* Center Column - Mockup Display */}
-          <div className="lg:col-span-5">
-            <div className="bg-white rounded-xl md:rounded-2xl shadow-xl p-4 md:p-6">
-              <div className="flex items-center space-x-2 md:space-x-3 mb-4 md:mb-6">
-                <div className="bg-gradient-to-r from-pink-500 to-purple-600 rounded-lg p-2">
-                  <Palette className="h-5 md:h-6 w-5 md:w-6 text-white" />
-                </div>
-                <h2 className="text-lg md:text-2xl font-bold text-gray-800">Live-Vorschau</h2>
-              </div>
-              
-              {/* Responsive mockup container */}
-              <div className="relative bg-gray-900 rounded-xl overflow-hidden" style={{ aspectRatio: '16/10' }}>
-                <NeonMockupStage
-                  lengthCm={Math.max(config.customWidth, config.calculatedHeight)}
-                  waterproof={config.isWaterproof}
-                  neonOn={true}
-                  uvOn={config.hasUvPrint || true}
-                  selectedBackground="ab_100cm_50%"
-                  onWaterproofChange={(isWaterproof) => handleConfigChange({ isWaterproof })}
-                />
-              </div>
-              
-              {/* Technical info - Responsive grid */}
-              <div className="mt-4 md:mt-6 bg-gray-50 rounded-xl p-3 md:p-4">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-sm">
-                  <div className="text-center">
-                    <div className="font-bold text-blue-600 text-lg md:text-xl">{config.customWidth}cm</div>
-                    <div className="text-gray-600 text-xs">Breite</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-purple-600 text-lg md:text-xl">{config.calculatedHeight}cm</div>
-                    <div className="text-gray-600 text-xs">Höhe</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-green-600 text-lg md:text-xl">{config.selectedDesign.elements}</div>
-                    <div className="text-gray-600 text-xs">Elemente</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-pink-600 text-lg md:text-xl">
-                      {calculateProportionalLedLength(
-                        config.selectedDesign.originalWidth,
-                        config.selectedDesign.originalHeight,
-                        config.selectedDesign.ledLength,
-                        config.customWidth,
-                        config.calculatedHeight
-                      )}m
-                    </div>
-                    <div className="text-gray-600 text-xs">LED-Länge</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Action Buttons */}
+          <div className="space-y-4">
+            <button
+              onClick={() => {
+                const newSign: SignConfiguration = {
+                  id: `sign-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  design: config.selectedDesign,
+                  width: config.customWidth,
+                  height: config.calculatedHeight,
+                  isEnabled: true,
+                  isWaterproof: config.isWaterproof,
+                  isTwoPart: config.isTwoPart,
+                  hasUvPrint: config.hasUvPrint,
+                  hasHangingSystem: config.hasHangingSystem,
+                  expressProduction: config.expressProduction,
+                };
+                
+                setConfig(prev => ({
+                  ...prev,
+                  signs: [...(prev.signs || []), newSign],
+                }));
+              }}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Hinzufügen</span>
+              <span className="bg-white/20 px-3 py-1 rounded-full">€{currentDesignPrice.toFixed(2)}</span>
+            </button>
 
-          {/* Right Column - Pricing */}
-          <div className="lg:col-span-3">
-            <PricingCalculator
-              config={config}
-              onRemoveSign={handleRemoveSign}
-              onGoToCart={() => navigate('/pricing')}
-            />
+            <button
+              onClick={() => navigate('/pricing')}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-3"
+            >
+              <Truck className="h-5 w-5" />
+              <span>Versand berechnen</span>
+            </button>
           </div>
         </div>
       </main>
-        )}
-      </header>
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+        <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
             <p className="text-gray-400 text-sm">
               © 2025 Nontel - Michael Wagner. Alle Rechte vorbehalten.
