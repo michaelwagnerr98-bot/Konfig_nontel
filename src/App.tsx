@@ -97,38 +97,6 @@ function HomePage() {
     config.expressProduction || false
   );
 
-  return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="flex items-center justify-between p-4">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="bg-white rounded-lg p-2">
-            <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-blue-600 rounded"></div>
-          </div>
-          <span className="text-white font-bold text-lg">NONTEL</span>
-        </div>
-
-        {/* Center - Admin */}
-        <div className="bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm">
-          👤 Admin
-        </div>
-
-        {/* Right - Secure Connection */}
-        <div className="flex items-center space-x-2">
-          <div className="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm flex items-center space-x-1">
-            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span>Sichere Verbindung</span>
-          </div>
-          <div className="bg-white/20 backdrop-blur-sm text-white p-2 rounded-lg">
-            <Shield className="h-4 w-4" />
-          </div>
-          <div className="bg-white/20 backdrop-blur-sm text-white p-2 rounded-lg">
-            <Zap className="h-4 w-4" />
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
       <main className="px-4 pb-8">
         {/* Mockup Stage - Full Width */}
